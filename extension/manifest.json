@@ -1,0 +1,13 @@
+{
+    "manifest_version": 2,
+
+    "name": "YouTube Timestamps",
+    "description": "Shows YouTube timestamps from comments.",
+    "version": "0.0.1",
+
+    "applications": {
+            "gecko": {
+            "id": "youtube-timestamps@ris58h"
+        }
+    }
+}
