@@ -9,5 +9,16 @@
             "gecko": {
             "id": "youtube-timestamps@ris58h"
         }
-    }
+    },
+
+    "permissions": [
+        "https://www.googleapis.com/youtube/v3/*"
+    ],
+
+    "content_scripts": [
+        {
+            "matches": ["https://www.youtube.com/*"],
+            "js": ["secret.js", "content.js"]
+        }
+    ]
 }
