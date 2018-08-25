@@ -1,7 +1,6 @@
 const YOUTUBE_TIMESTAMP_REGEX = /(^|\s)(((\d?\d):)?((\d\d))|\d):(\d\d)/
 
 if (window.location.pathname == '/watch') {
-    // const video = document.querySelector("video")
     const videoId = parseParams(window.location.href)['v']
     const fields = 'items(snippet(topLevelComment(snippet)))'
     fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=snippet&fields=${fields}&order=relevance&key=${API_KEY}`)
@@ -26,9 +25,20 @@ if (window.location.pathname == '/watch') {
 }
 
 function processTimeComments(timeComments) {
+    const video = document.querySelector("video")
+    const container = document.querySelector('.ytp-progress-list')
+    const list = document.createElement('div')
+    list.classList.add('__youtube-timestamps__list')
     for (const tc of timeComments) {
-        console.log(tc)
+        if (tc.time > video.duration) {
+            continue
+        }
+        const stamp = document.createElement('div')
+        stamp.classList.add('__youtube-timestamps__stamp')
+        stamp.style.left = (tc.time / video.duration * 100) + "%"
+        list.appendChild(stamp)
     }
+    container.appendChild(list)
 }
 
 function parseParams(href) {
@@ -53,6 +63,6 @@ function extractTime(text) {
     const parts = ts[0].split(':').reverse()
     const secs = parseInt(parts[0])
     const mins = parseInt(parts[1])
-    const hours = parseInt(parts[2]) || 0;
+    const hours = parseInt(parts[2]) || 0
     return secs + (60 * mins) + (60 * 24 * hours)
 }

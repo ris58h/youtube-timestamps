@@ -1,0 +1,14 @@
+.__youtube-timestamps__list {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    transform: scaleX(1);
+    z-index: 35;
+}
+
+.__youtube-timestamps__stamp {
+    height: 100%;
+    width: 3px;
+    position: fixed;
+    background-color: white;
+}
