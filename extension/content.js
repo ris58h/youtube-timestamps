@@ -27,8 +27,8 @@ if (window.location.pathname == '/watch') {
 function processTimeComments(timeComments) {
     const video = document.querySelector("video")
     const container = document.querySelector('.ytp-progress-list')
-    const list = document.createElement('div')
-    list.classList.add('__youtube-timestamps__list')
+    const bar = document.createElement('div')
+    bar.classList.add('__youtube-timestamps__bar')
     for (const tc of timeComments) {
         if (tc.time > video.duration) {
             continue
@@ -36,9 +36,9 @@ function processTimeComments(timeComments) {
         const stamp = document.createElement('div')
         stamp.classList.add('__youtube-timestamps__stamp')
         stamp.style.left = (tc.time / video.duration * 100) + "%"
-        list.appendChild(stamp)
+        bar.appendChild(stamp)
     }
-    container.appendChild(list)
+    container.appendChild(bar)
 }
 
 function parseParams(href) {
