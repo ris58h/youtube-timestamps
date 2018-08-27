@@ -8,7 +8,9 @@
 
 .__youtube-timestamps__stamp {
     height: 100%;
-    width: 3px;
+    min-width: 3px;
+    max-width: 5px;
+    width: 0.5%;
     position: fixed;
     background-color: white;
 }
