@@ -15,9 +15,15 @@
     background-color: white;
 }
 
+.__youtube-timestamps__preview {
+    background-color: white;
+    margin-bottom: 2px;
+}
+
 .__youtube-timestamps__preview__author {
     display: flex;
     align-items: center;
+    padding: 2px;
 }
 
 .__youtube-timestamps__preview__avatar {
@@ -27,9 +33,14 @@
 }
 
 .__youtube-timestamps__preview__name {
-    color: rgb(255, 0, 0);
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: rgb(17, 17, 17);
 }
 
 .__youtube-timestamps__preview__text {
     padding: 2px;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: rgb(17, 17, 17);
 }
