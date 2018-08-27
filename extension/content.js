@@ -48,7 +48,7 @@ function processTimeComments(timeComments) {
 }
 
 function showPreview(avatar, name, text) {
-    const parent = document.querySelector('.ytp-tooltip.ytp-preview')
+    const parent = document.querySelector('.ytp-tooltip')
     if (!parent) {
         return
     }
@@ -75,7 +75,7 @@ function showPreview(avatar, name, text) {
         preview.appendChild(textElement)
     }
     preview.style.display = ''
-    preview.style.width = parent.querySelector('.ytp-tooltip-bg').style.width
+    preview.style.width = parent.querySelector('.ytp-tooltip-bg').style.width || '160px'
     preview.querySelector('.__youtube-timestamps__preview__avatar').src = avatar
     preview.querySelector('.__youtube-timestamps__preview__name').textContent = name
     preview.querySelector('.__youtube-timestamps__preview__text').textContent = text
