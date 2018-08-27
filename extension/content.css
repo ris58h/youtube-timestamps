@@ -14,3 +14,22 @@
     position: fixed;
     background-color: white;
 }
+
+.__youtube-timestamps__preview__author {
+    display: flex;
+    align-items: center;
+}
+
+.__youtube-timestamps__preview__avatar {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+.__youtube-timestamps__preview__name {
+    color: rgb(255, 0, 0);
+}
+
+.__youtube-timestamps__preview__text {
+    padding: 2px;
+}
