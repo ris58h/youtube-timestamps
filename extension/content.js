@@ -48,7 +48,10 @@ function processTimeComments(timeComments) {
 
 function showPreview(avatar, name, text) {
     const parent = document.querySelector('.ytp-tooltip.ytp-preview')
-    let preview = document.querySelector('.__youtube-timestamps__preview')
+    if (!parent) {
+        return
+    }
+    let preview = parent.querySelector('.__youtube-timestamps__preview')
     if (!preview) {
         preview = document.createElement('div')
         preview.classList.add('__youtube-timestamps__preview')
