@@ -33,7 +33,8 @@ function processTimeComments(timeComments) {
         }
         const stamp = document.createElement('div')
         stamp.classList.add('__youtube-timestamps__stamp')
-        stamp.style.left = (tc.time / video.duration * 100) + "%"
+        const offset = tc.time / video.duration * 100
+        stamp.style.left = `calc(${offset}% - 2px)`
         bar.appendChild(stamp)
 
         stamp.addEventListener('mouseenter', function() {
