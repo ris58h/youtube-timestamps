@@ -70,5 +70,5 @@ function extractTime(text) {
         return null
     }
     const hours = parseInt(parts[2]) || 0
-    return secs + (60 * mins) + (60 * 24 * hours)
+    return secs + (60 * mins) + (60 * 60 * hours)
 }
