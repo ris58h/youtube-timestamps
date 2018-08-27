@@ -62,7 +62,13 @@ function extractTime(text) {
     }
     const parts = ts[0].split(':').reverse()
     const secs = parseInt(parts[0])
+    if (secs > 59) {
+        return null
+    }
     const mins = parseInt(parts[1])
+    if (mins > 59) {
+        return null
+    }
     const hours = parseInt(parts[2]) || 0
     return secs + (60 * mins) + (60 * 24 * hours)
 }
