@@ -17,6 +17,7 @@ if (window.location.pathname == '/watch') {
                         })
                     }
                 }
+                timeComments.sort((a, b) => a.time - b.time)
                 processTimeComments(timeComments)
             })
         })
