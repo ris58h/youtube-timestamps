@@ -61,6 +61,7 @@ describe('e2e', () => {
                     const expected = expectedTimeComments[i]
                     const box = await t.boundingBox()
                     await page.mouse.move(box.x, box.y)
+                    await page.waitFor('.__youtube-timestamps__preview', { visible: true })
                     const text = await page.$eval('.__youtube-timestamps__preview__text', e => e.textContent)
                     expect(text).to.equal(expected.text)
                 }
