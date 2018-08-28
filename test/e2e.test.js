@@ -107,8 +107,4 @@ describe('e2e', () => {
         return pathname.endsWith('.woff')
             || pathname.endsWith('.woff2')
     }
-
-    after(async () => {
-        browser.close()
-    })
 })
