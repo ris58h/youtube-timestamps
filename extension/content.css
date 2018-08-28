@@ -15,9 +15,18 @@
     background-color: white;
 }
 
+.__youtube-timestamps__preview-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .__youtube-timestamps__preview {
+    position: absolute;
     background-color: white;
-    margin-bottom: 2px;
+    bottom: 4px;
+    width: 160px;
 }
 
 .__youtube-timestamps__preview__author {

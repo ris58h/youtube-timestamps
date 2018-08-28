@@ -57,7 +57,10 @@ function showPreview(avatar, name, text) {
     if (!preview) {
         preview = document.createElement('div')
         preview.classList.add('__youtube-timestamps__preview')
-        parent.insertAdjacentElement('afterbegin', preview)
+        const previewWrapper = document.createElement('div')
+        previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')
+        previewWrapper.appendChild(preview)
+        parent.insertAdjacentElement('afterbegin', previewWrapper)
 
         const authorElement = document.createElement('div')
         authorElement.classList.add('__youtube-timestamps__preview__author')
