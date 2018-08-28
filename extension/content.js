@@ -1,9 +1,9 @@
 if (window.location.pathname == '/watch') {
     const videoId = parseParams(window.location.href)['v']
-    const fields = 'items(snippet(topLevelComment(snippet)))'
-    fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=snippet&fields=${fields}&order=relevance&key=${API_KEY}`)
+    const commentFields = 'items(snippet(topLevelComment(snippet)))'
+    fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=snippet&fields=${commentFields}&order=relevance&key=${API_KEY}`)
         .then(function (response) {
-            response.json().then(function(data) {
+            response.json().then(function (data) {
                 const timeComments = []
                 for (const item of data.items) {
                     const commentSnippet = item.snippet.topLevelComment.snippet
@@ -17,28 +17,36 @@ if (window.location.pathname == '/watch') {
                         })
                     }
                 }
-                timeComments.sort((a, b) => a.time - b.time)
-                processTimeComments(timeComments)
+                if (timeComments.length > 0) {
+                    timeComments.sort((a, b) => a.time - b.time)
+                    const videoFields = 'items(contentDetails(duration))'
+                    fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&fields=${videoFields}&key=${API_KEY}`)
+                        .then(function (response) {
+                            response.json().then(function (data) {
+                                const videoDuration = parseDuration(data.items[0].contentDetails.duration)
+                                showTimeComments(timeComments, videoDuration)
+                            })
+                        })
+                }
             })
         })
 }
 
-function processTimeComments(timeComments) {
-    const video = document.querySelector("video")
+function showTimeComments(timeComments, videoDuration) {
     const container = document.querySelector('.ytp-progress-list')
     const bar = document.createElement('div')
     bar.classList.add('__youtube-timestamps__bar')
     for (const tc of timeComments) {
-        if (tc.time > video.duration) {
+        if (tc.time > videoDuration) {
             continue
         }
         const stamp = document.createElement('div')
         stamp.classList.add('__youtube-timestamps__stamp')
-        const offset = tc.time / video.duration * 100
+        const offset = tc.time / videoDuration * 100
         stamp.style.left = `calc(${offset}% - 2px)`
         bar.appendChild(stamp)
 
-        stamp.addEventListener('mouseenter', function() {
+        stamp.addEventListener('mouseenter', function () {
             showPreview(tc.authorAvatar, tc.authorName, tc.text)
         })
         stamp.addEventListener('mouseleave', function () {
@@ -122,4 +130,27 @@ function extractTime(text) {
     }
     const hours = parseInt(parts[2]) || 0
     return secs + (60 * mins) + (60 * 60 * hours)
+}
+
+function parseDuration(duration) {
+    const matches = duration.match(/[0-9]+[HMS]/g);
+    let seconds = 0;
+    matches.forEach(function (part) {
+        const unit = part.charAt(part.length - 1);
+        const amount = parseInt(part.slice(0, -1));
+        switch (unit) {
+            case 'H':
+                seconds += amount * 60 * 60;
+                break;
+            case 'M':
+                seconds += amount * 60;
+                break;
+            case 'S':
+                seconds += amount;
+                break;
+            default:
+            // noop
+        }
+    });
+    return seconds;
 }
