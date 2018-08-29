@@ -7,8 +7,8 @@ if (window.location.pathname == '/watch') {
                 const timeComments = []
                 for (const item of data.items) {
                     const commentSnippet = item.snippet.topLevelComment.snippet
-                    const ts = extractTimestamp(commentSnippet.textOriginal)
-                    if (ts) {
+                    const timestamps = extractTimestamps(commentSnippet.textOriginal)
+                    for (const ts of timestamps) {
                         const time = parseTimestamp(ts)
                         if (time) {
                             timeComments.push({
@@ -138,12 +138,8 @@ function parseParams(href) {
     return params
 }
 
-function extractTimestamp(text) {
-    const ts = text.match(/(^|\s)(((\d?\d:)?\d\d|\d):\d\d)/)
-    if (!ts) {
-        return null
-    }
-    return ts[2]
+function extractTimestamps(text) {
+    return (text.match(/(^|\s)((\d?\d:)?\d\d|\d):\d\d/g) || []).map(s => s.trim())
 }
 
 function parseTimestamp(ts) {
