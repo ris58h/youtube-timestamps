@@ -19,12 +19,13 @@ describe('e2e', () => {
     })
 
     test('Video without preview', 'https://www.youtube.com/watch?v=J_3rb81Url4', [
+        { text: "too lazy to look at the description? for timestamps? NO WORRY! im here!!\n\n2:06 A Names (and ! name)\n14:15 B Names\n19:12 C Names\n27:56 D Names\n33:58 E Names\n39:32 F Names\n42:08 G Names\n45:05 H Names\n48:14 I Names\n50:53 J Names\n1:01:00 K Names\n1:08:15 L Names\n1:13:41 M Names\n1:21:45 N Names\n1:24:15 O Names\n1:25:58 P Names\n1:29:36 Q Names\n1:30:00 R Names\n1:35:54 S Names\n1:43:55 T Names\n1:49:33 U Names\n1:50:25 V Names\n1:51:57 W Names\n1:53:22 X Names\n1:53:41 Y Names\n1:56:55 THANK YOU!"},
         { text: "50% of the comment section: OML SHE SAID MY NAME\nOther 50%: She didn't say my name >:O\n\n\n36:32 ;^)" },
-        { text: "Jaiden- 51:32\n\nGibbi- Jaiden, goodnight Jaiden\n\nMe- OMG SHE SAID MY NAME!\n\n(My real name is Jaiden not Edna -_- That's just my characters name)" },
+        // { text: "Jaiden- 51:32\n\nGibbi- Jaiden, goodnight Jaiden\n\nMe- OMG SHE SAID MY NAME!\n\n(My real name is Jaiden not Edna -_- That's just my characters name)" },
         { text: "52:12\nWhat do you hear?Yanny or Laurel?" },
         /*{ text: "1:03:33 Ouch!" },*/{ text: "1:03:33 Jeezzzz" }, //TODO collision
         { text: "1:03:33 Jeezzzz" },
-        { text: "1:50:09 whoever put their name as Uvuvwevwevwe Onyetenyevwe Ugwemuhwem Osas is an absolute legend!!" },
+        // { text: "1:50:09 whoever put their name as Uvuvwevwevwe Onyetenyevwe Ugwemuhwem Osas is an absolute legend!!" },
         { text: "1:50:13 thank you for saying my name" },
         { text: "Who else skipped until your name was called and my name is Will/William and I am very well, hope you are feeling the same way🙃🙂 1:52:47" },
     ])
