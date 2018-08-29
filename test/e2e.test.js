@@ -63,7 +63,8 @@ describe('e2e', () => {
                     await page.waitFor('.__youtube-timestamps__preview', { visible: true })
                     const text = await page.$eval('.__youtube-timestamps__preview__text', e => e.textContent)
                     expect(text).to.equal(expected.text)
-                    expect(text).contain(expected.ts)
+                    const tsText = await page.$eval('.__youtube-timestamps__preview__text-stamp', e => e.textContent)
+                    expect(tsText).contain(expected.ts)
                 }
             })
 

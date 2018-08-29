@@ -7,14 +7,18 @@ if (window.location.pathname == '/watch') {
                 const timeComments = []
                 for (const item of data.items) {
                     const commentSnippet = item.snippet.topLevelComment.snippet
-                    const time = extractTime(commentSnippet.textOriginal)
-                    if (time) {
-                        timeComments.push({
-                            authorAvatar: commentSnippet.authorProfileImageUrl,
-                            authorName: commentSnippet.authorDisplayName,
-                            time: time,
-                            text: commentSnippet.textOriginal
-                        })
+                    const ts = extractTimestamp(commentSnippet.textOriginal)
+                    if (ts) {
+                        const time = parseTimestamp(ts)
+                        if (time) {
+                            timeComments.push({
+                                authorAvatar: commentSnippet.authorProfileImageUrl,
+                                authorName: commentSnippet.authorDisplayName,
+                                ts,
+                                time,
+                                text: commentSnippet.textOriginal
+                            })
+                        }
                     }
                 }
                 if (timeComments.length > 0) {
@@ -47,7 +51,7 @@ function showTimeComments(timeComments, videoDuration) {
         bar.appendChild(stamp)
 
         stamp.addEventListener('mouseenter', function () {
-            showPreview(tc.authorAvatar, tc.authorName, tc.text)
+            showPreview(tc)
         })
         stamp.addEventListener('mouseleave', function () {
             hidePreview()
@@ -56,7 +60,7 @@ function showTimeComments(timeComments, videoDuration) {
     container.appendChild(bar)
 }
 
-function showPreview(avatar, name, text) {
+function showPreview(timeComment) {
     const parent = document.querySelector('.ytp-tooltip')
     if (!parent) {
         return
@@ -88,9 +92,29 @@ function showPreview(avatar, name, text) {
     }
     preview.style.display = ''
     preview.style.width = parent.querySelector('.ytp-tooltip-bg').style.width || '160px'
-    preview.querySelector('.__youtube-timestamps__preview__avatar').src = avatar
-    preview.querySelector('.__youtube-timestamps__preview__name').textContent = name
-    preview.querySelector('.__youtube-timestamps__preview__text').textContent = text
+    preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
+    preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
+    const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
+    textNode.innerHTML = ''
+    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.ts))
+}
+
+function highlightTextFragment(text, fragment) {
+    var result = document.createDocumentFragment();
+    const parts = text.split(fragment)
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i]
+        if (part) {
+            result.appendChild(document.createTextNode(part))
+        }
+        if (i < parts.length - 1) {
+            const fragmentNode = document.createElement('span')
+            fragmentNode.classList.add('__youtube-timestamps__preview__text-stamp')
+            fragmentNode.textContent = fragment
+            result.appendChild(fragmentNode)
+        }
+    }
+    return result
 }
 
 function hidePreview() {
@@ -114,12 +138,16 @@ function parseParams(href) {
     return params
 }
 
-function extractTime(text) {
-    const ts = text.match(/(^|\s)(((\d?\d):)?((\d\d))|\d):(\d\d)/)
-    if (!ts || !ts[0]) {
+function extractTimestamp(text) {
+    const ts = text.match(/(^|\s)(((\d?\d:)?\d\d|\d):\d\d)/)
+    if (!ts) {
         return null
     }
-    const parts = ts[0].split(':').reverse()
+    return ts[2]
+}
+
+function parseTimestamp(ts) {
+    const parts = ts.split(':').reverse()
     const secs = parseInt(parts[0])
     if (secs > 59) {
         return null
