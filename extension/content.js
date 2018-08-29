@@ -91,7 +91,7 @@ function showPreview(timeComment) {
         preview.appendChild(textElement)
     }
     preview.style.display = ''
-    preview.style.width = parent.querySelector('.ytp-tooltip-bg').style.width || '160px'
+    preview.style.width = parent.querySelector('.ytp-tooltip-bg').style.width
     preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
     preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
     const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
