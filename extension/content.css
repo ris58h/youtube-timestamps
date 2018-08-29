@@ -52,6 +52,7 @@
     font-size: 1.4rem;
     font-weight: 400;
     color: rgb(17, 17, 17);
+    white-space: pre-line;
 }
 
 .__youtube-timestamps__preview__text-stamp {
