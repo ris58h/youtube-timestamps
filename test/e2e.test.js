@@ -30,6 +30,14 @@ describe('e2e', () => {
         { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
     ])
 
+    test('Multiple timestamps in one comment', 'https://www.youtube.com/watch?v=NkSpiq5E9d8', [
+        { ts: '7:01', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
+        { ts: '8:23', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
+        { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },//TODO collision { ts: '10:25', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
+        { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
+        { ts: '12:15', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
+    ])
+
     test('Embedded video', `file://${process.cwd()}/test/embedded.html`, [
         { ts: '2:29', text: "So effortlessly catched 2:29" },
         { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
