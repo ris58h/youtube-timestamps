@@ -61,37 +61,43 @@ describe('e2e', () => {
         { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
     ])
 
+    test('Embedded video', `file://${process.cwd()}/test/embedded.html`, [
+        { ts: '2:29', text: "So effortlessly catched 2:29" },
+        { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
+    ], page => page.frames()[1])
+
     after(() => {
         browser.close()
     })
 
-    function test(name, url, expectedTimeComments) {
+    function test(name, url, expectedTimeComments, frameGetter) {
         describe(name, () => {
             let page
+            let frame
 
             before(async () => {
                 page = await createPage(url)
+                frame = frameGetter ? frameGetter(page) : page.mainFrame()
 
-                const ad = await page.$('.videoAdUi')
+                const ad = await frame.$('.videoAdUi')
                 if (ad) {
-                    await page.waitFor('.videoAdUiSkipButton', { visible: true })
-                    await page.click('.videoAdUiSkipButton')
+                    await frame.waitFor('.videoAdUiSkipButton', { visible: true })
+                    await frame.click('.videoAdUiSkipButton')
                 }
-                await page.waitFor('.__youtube-timestamps__stamp')
+                await frame.waitFor('.__youtube-timestamps__stamp')
             })
 
             it('timestamps', async () => {
-                const ts = await page.$$('.__youtube-timestamps__stamp')
+                const ts = await frame.$$('.__youtube-timestamps__stamp')
                 expect(ts.length).to.equal(expectedTimeComments.length)
                 for (let i = 0; i < ts.length; i++) {
                     const t = ts[i]
                     const expected = expectedTimeComments[i]
-                    const box = await t.boundingBox()
-                    await page.mouse.move(box.x, box.y)
-                    await page.waitFor('.__youtube-timestamps__preview', { visible: true })
-                    const text = await page.$eval('.__youtube-timestamps__preview__text', e => e.textContent)
+                    await t.hover()
+                    await frame.waitFor('.__youtube-timestamps__preview', { visible: true })
+                    const text = await frame.$eval('.__youtube-timestamps__preview__text', e => e.textContent)
                     expect(text).to.equal(expected.text)
-                    const tsText = await page.$eval('.__youtube-timestamps__preview__text-stamp', e => e.textContent)
+                    const tsText = await frame.$eval('.__youtube-timestamps__preview__text-stamp', e => e.textContent)
                     expect(tsText).contain(expected.ts)
                 }
             })

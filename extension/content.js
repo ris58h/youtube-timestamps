@@ -48,6 +48,8 @@ function main() {
 function getVideoId() {
     if (window.location.pathname == '/watch') {
         return parseParams(window.location.href)['v']
+    } else if (window.location.pathname.startsWith('/embed/')) {
+        return window.location.pathname.substring('/embed/'.length)
     } else {
         return null
     }
