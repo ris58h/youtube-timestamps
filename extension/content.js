@@ -1,37 +1,74 @@
-if (window.location.pathname == '/watch') {
-    const videoId = parseParams(window.location.href)['v']
+const navListener = function () {
+    removeTimeComments()
+    main()
+}
+window.addEventListener('popstate', navListener)
+window.addEventListener('yt-navigate-start', navListener)
+// old design
+//TODO 'spfdone' fires with 'popstate' (double navListener call on history back)
+window.addEventListener('spfdone', navListener)
+
+main()
+
+function main() {
+    const videoId = getVideoId()
+    if (videoId) {
+        fetchComments(videoId, items => {
+            const timeComments = []
+            for (const item of items) {
+                const commentSnippet = item.snippet.topLevelComment.snippet
+                const timestamps = extractTimestamps(commentSnippet.textOriginal)
+                for (const ts of timestamps) {
+                    const time = parseTimestamp(ts)
+                    if (time) {
+                        timeComments.push({
+                            authorAvatar: commentSnippet.authorProfileImageUrl,
+                            authorName: commentSnippet.authorDisplayName,
+                            ts,
+                            time,
+                            text: commentSnippet.textOriginal
+                        })
+                    }
+                }
+            }
+            if (timeComments.length > 0) {
+                timeComments.sort((a, b) => a.time - b.time)
+                fetchVideo(videoId, video => {
+                    const videoDuration = parseDuration(video.contentDetails.duration)
+                    const videoIdAfterRequest = getVideoId()
+                    if (videoId === videoIdAfterRequest) {
+                        showTimeComments(timeComments, videoDuration)
+                    }
+                })
+            }
+        })
+    }
+}
+
+function getVideoId() {
+    if (window.location.pathname == '/watch') {
+        return parseParams(window.location.href)['v']
+    } else {
+        return null
+    }
+}
+
+function fetchComments(videoId, callback) {
     const commentFields = 'items(snippet(topLevelComment(snippet)))'
     fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=snippet&fields=${commentFields}&order=relevance&key=${API_KEY}`)
         .then(function (response) {
             response.json().then(function (data) {
-                const timeComments = []
-                for (const item of data.items) {
-                    const commentSnippet = item.snippet.topLevelComment.snippet
-                    const timestamps = extractTimestamps(commentSnippet.textOriginal)
-                    for (const ts of timestamps) {
-                        const time = parseTimestamp(ts)
-                        if (time) {
-                            timeComments.push({
-                                authorAvatar: commentSnippet.authorProfileImageUrl,
-                                authorName: commentSnippet.authorDisplayName,
-                                ts,
-                                time,
-                                text: commentSnippet.textOriginal
-                            })
-                        }
-                    }
-                }
-                if (timeComments.length > 0) {
-                    timeComments.sort((a, b) => a.time - b.time)
-                    const videoFields = 'items(contentDetails(duration))'
-                    fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&fields=${videoFields}&key=${API_KEY}`)
-                        .then(function (response) {
-                            response.json().then(function (data) {
-                                const videoDuration = parseDuration(data.items[0].contentDetails.duration)
-                                showTimeComments(timeComments, videoDuration)
-                            })
-                        })
-                }
+                callback(data.items)
+            })
+        })
+}
+
+function fetchVideo(videoId, callback) {
+    const videoFields = 'items(contentDetails(duration))'
+    fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&fields=${videoFields}&key=${API_KEY}`)
+        .then(function (response) {
+            response.json().then(function (data) {
+                callback(data.items[0])
             })
         })
 }
@@ -58,6 +95,13 @@ function showTimeComments(timeComments, videoDuration) {
         })
     }
     container.appendChild(bar)
+}
+
+function removeTimeComments() {
+    const bar = document.querySelector('.__youtube-timestamps__bar')
+    if (bar) {
+        bar.remove()
+    }
 }
 
 function showPreview(timeComment) {
