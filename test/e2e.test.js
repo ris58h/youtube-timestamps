@@ -31,6 +31,7 @@ describe('e2e', () => {
         { ts: '45:05', text: thatLongComment},
         { ts: '48:14', text: thatLongComment},
         { ts: '50:53', text: thatLongComment},
+        { ts: '51:32', text: "Jaiden- 51:32\n\nGibbi- Jaiden, goodnight Jaiden\n\nMe- OMG SHE SAID MY NAME!\n\n(My real name is Jaiden not Edna -_- That's just my characters name)" },
         { ts: '52:12', text: "52:12\nWhat do you hear?Yanny or Laurel?" },
         { ts: '1:01:00', text: thatLongComment},
         /*{ ts: '1:03:33', text: "1:03:33 Ouch!" },*/{ ts: '1:03:33', text: "1:03:33 Jeezzzz" }, //TODO collision
@@ -45,6 +46,7 @@ describe('e2e', () => {
         { ts: '1:35:54', text: thatLongComment},
         { ts: '1:43:55', text: thatLongComment},
         { ts: '1:49:33', text: thatLongComment},
+        { ts: '1:50:09', text: "1:50:09 whoever put their name as Uvuvwevwevwe Onyetenyevwe Ugwemuhwem Osas is an absolute legend!!" },
         { ts: '1:50:13', text: "1:50:13 thank you for saying my name" },
         { ts: '1:50:25', text: thatLongComment},
         { ts: '1:51:57', text: thatLongComment},
