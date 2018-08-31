@@ -18,70 +18,68 @@ describe('e2e', () => {
         })
     })
 
-    test('Video without preview', 'https://www.youtube.com/watch?v=tBiPumGnVT4', [
+    describe('Video without preview', () => test('https://www.youtube.com/watch?v=tBiPumGnVT4', [
         { ts: '1:20', text: 'check out 1:20 his face though XD'},
         { ts: '3:14', text: 'test 3:14'},
         { ts: '3:49', text: 'Click this ====> 3:49 for the best part of the video'},
         { ts: '3:51', text: 'check 3:51'},
-    ])
+    ]))
 
-    test('Video with preview', 'https://www.youtube.com/watch?v=vUcX6wBPqCQ', [
+    describe('Video with preview', () => test('https://www.youtube.com/watch?v=vUcX6wBPqCQ', [
         { ts: '2:29', text: "So effortlessly catched 2:29" },
         { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
-    ])
+    ]))
 
-    test('Multiple timestamps in one comment', 'https://www.youtube.com/watch?v=NkSpiq5E9d8', [
+    describe('Multiple timestamps in one comment', () => test('https://www.youtube.com/watch?v=NkSpiq5E9d8', [
         { ts: '7:01', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
         { ts: '8:23', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
         { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },//TODO collision { ts: '10:25', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
         { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
         { ts: '12:15', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
-    ])
+    ]))
 
-    test('Embedded video', `file://${process.cwd()}/test/embedded.html`, [
+    describe('Embedded video', () => test(`file://${process.cwd()}/test/embedded.html`, [
         { ts: '2:29', text: "So effortlessly catched 2:29" },
         { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
-    ], page => page.frames()[1])
+    ], page => page.frames()[1]))
 
     after(() => {
         browser.close()
     })
 
-    function test(name, url, expectedTimeComments, frameGetter) {
-        describe(name, () => {
-            let page
-            let frame
+    function test(url, expectedTimeComments, frameGetter) {
+        let page
+        let frame
 
-            before(async () => {
-                page = await createPage(url)
-                frame = frameGetter ? frameGetter(page) : page.mainFrame()
+        before(async () => {
+            page = await createPage(url)
+            frame = frameGetter ? frameGetter(page) : page.mainFrame()
 
-                const ad = await frame.$('.videoAdUi')
-                if (ad) {
-                    await frame.waitFor('.videoAdUiSkipButton', { visible: true })
-                    await frame.click('.videoAdUiSkipButton')
-                }
-                await frame.waitFor('.__youtube-timestamps__stamp')
-            })
+            const ad = await frame.$('.videoAdUi')
+            if (ad) {
+                await frame.waitFor('.videoAdUiSkipButton', { visible: true })
+                await frame.click('.videoAdUiSkipButton')
+            }
+            await frame.waitFor('.__youtube-timestamps__stamp')
+        })
 
-            it('timestamps', async () => {
-                const ts = await frame.$$('.__youtube-timestamps__stamp')
-                expect(ts.length).to.equal(expectedTimeComments.length)
-                for (let i = 0; i < ts.length; i++) {
-                    const t = ts[i]
-                    const expected = expectedTimeComments[i]
-                    await t.hover()
-                    await frame.waitFor('.__youtube-timestamps__preview', { visible: true })
-                    const text = await frame.$eval('.__youtube-timestamps__preview__text', e => e.textContent)
-                    expect(text).to.equal(expected.text)
-                    const tsText = await frame.$eval('.__youtube-timestamps__preview__text-stamp', e => e.textContent)
-                    expect(tsText).contain(expected.ts)
-                }
-            })
+        it('timestamps', async () => {
+            const ts = await frame.$$('.__youtube-timestamps__stamp')
+            expect(ts.length).to.equal(expectedTimeComments.length)
+            for (let i = 0; i < ts.length; i++) {
+                const t = ts[i]
+                const expected = expectedTimeComments[i]
+                await t.hover()
+                await frame.waitFor('.__youtube-timestamps__preview', { visible: true })
+                const text = await frame.$eval('.__youtube-timestamps__preview__text', e => e.textContent)
+                expect(text).to.equal(expected.text)
+                const tsText = await frame.$eval('.__youtube-timestamps__preview__text-stamp', e => e.textContent)
+                expect(tsText).contain(expected.ts)
+            }
+        })
 
-            after(async () => {
-                await page.close()
-            })
+        after(async () => {
+            await page.close()
         })
     }
 
