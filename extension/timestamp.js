@@ -16,8 +16,10 @@ function parseTimestamp(ts) {
     return secs + (60 * mins) + (60 * 60 * hours)
 }
 
-//TODO It isn't supported in Web Extensions so we get an error in background script console.
-module.exports = {
-    extractTimestamps,
-    parseTimestamp
+// Modules aren't supported in Web Extensions.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        extractTimestamps,
+        parseTimestamp
+    }
 }
