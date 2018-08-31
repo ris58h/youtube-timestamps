@@ -19,7 +19,7 @@
         {
             "matches": ["https://www.youtube.com/*"],
             "all_frames": true,
-            "js": ["secret.js", "content.js"],
+            "js": ["secret.js", "timestamp.js", "content.js"],
             "css": ["content.css"]
         }
     ]
