@@ -10,43 +10,50 @@ window.addEventListener('spfdone', navListener)
 
 main()
 
-const MAX_TEXT_LENGTH = 128
-
 function main() {
     const videoId = getVideoId()
     if (videoId) {
-        fetchComments(videoId, items => {
-            const commentSnippets = items.map(item => item.snippet.topLevelComment.snippet)
-            const timeComments = getTimeComments(commentSnippets)
-            if (timeComments.length > 0) {
-                timeComments.sort((a, b) => a.time - b.time)
-                fetchVideo(videoId, video => {
-                    const videoDuration = parseDuration(video.contentDetails.duration)
-                    const videoIdAfterRequest = getVideoId()
-                    if (videoId === videoIdAfterRequest) {
-                        showTimeComments(timeComments, videoDuration)
-                    }
-                })
+        Promise.all([fetchComments(videoId), fetchVideo(videoId)]).then(results => {
+            const videoIdAfterRequest = getVideoId()
+            if (videoId !== videoIdAfterRequest) {
+                return
             }
+            const timeComments = []
+            for (const item of results[0]) {
+                const cs = item.snippet.topLevelComment.snippet
+                for (const tsContext of getTimestampContexts(cs.textOriginal)) {
+                    timeComments.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, cs.textOriginal, tsContext))
+                }
+            }
+            const videoItem = results[1]
+            const videoDescription = videoItem.snippet.description
+            const videoTsContexts = getTimestampContexts(videoDescription)
+            const p = videoTsContexts.length === 0 ? Promise.resolve() : fetchChannel(videoItem.snippet.channelId).then(channelItem => {
+                const channelAvatar = channelItem.snippet.thumbnails.default.url
+                const channelTitle = channelItem.snippet.title
+                for (const tsContext of videoTsContexts) {
+                    timeComments.push(newTimeComment(channelAvatar, channelTitle, videoDescription, tsContext))
+                }
+            })
+            p.then(function () {
+                timeComments.sort((a, b) => a.time - b.time)
+                const videoDuration = parseDuration(videoItem.contentDetails.duration)
+                showTimeComments(timeComments, videoDuration)
+            })
         })
     }
 }
 
-function getTimeComments(commentSnippets) {
-    const timeComments = []
-    for (const commentSnippet of commentSnippets) {
-        const timestamps = getTimestampContexts(commentSnippet.textOriginal)
-        for (const ts of timestamps) {
-            timeComments.push({
-                authorAvatar: commentSnippet.authorProfileImageUrl,
-                authorName: commentSnippet.authorDisplayName,
-                timestamp: ts.timestamp,
-                time: ts.time,
-                text: commentSnippet.textOriginal.length > MAX_TEXT_LENGTH ? ts.line : commentSnippet.textOriginal
-            })
-        }
+const MAX_TEXT_LENGTH = 128
+
+function newTimeComment(authorAvatar, authorName, text, tsContext) {
+    return {
+        authorAvatar,
+        authorName,
+        timestamp: tsContext.timestamp,
+        time: tsContext.time,
+        text: text.length > MAX_TEXT_LENGTH ? tsContext.line : text
     }
-    return timeComments
 }
 
 function getTimestampContexts(text) {
@@ -80,22 +87,36 @@ function getVideoId() {
     }
 }
 
-function fetchComments(videoId, callback) {
-    const commentFields = 'items(snippet(topLevelComment(snippet)))'
-    fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=snippet&fields=${commentFields}&order=relevance&key=${API_KEY}`)
+function fetchComments(videoId) {
+    const part = 'snippet'
+    const fields = 'items(snippet(topLevelComment(snippet)))'
+    const order = 'relevance'
+    return fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&key=${API_KEY}`)
         .then(function (response) {
-            response.json().then(function (data) {
-                callback(data.items)
+            return response.json().then(function (data) {
+                return data.items
             })
         })
 }
 
-function fetchVideo(videoId, callback) {
-    const videoFields = 'items(contentDetails(duration))'
-    fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&fields=${videoFields}&key=${API_KEY}`)
+function fetchVideo(videoId) {
+    const part = 'snippet,contentDetails'
+    const fields = 'items(snippet(description,channelId),contentDetails(duration))'
+    return fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}&key=${API_KEY}`)
         .then(function (response) {
-            response.json().then(function (data) {
-                callback(data.items[0])
+            return response.json().then(function (data) {
+                return data.items[0]
+            })
+        })
+}
+
+function fetchChannel(channelId) {
+    const part = 'snippet'
+    const fields = 'items(snippet(title,thumbnails(default)))'
+    return fetch(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}&key=${API_KEY}`)
+        .then(function (response) {
+            return response.json().then(function (data) {
+                return data.items[0]
             })
         })
 }

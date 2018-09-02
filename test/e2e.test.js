@@ -18,17 +18,33 @@ describe('e2e', () => {
         })
     })
 
-    describe('Video without preview', () => test('https://www.youtube.com/watch?v=tBiPumGnVT4', [
-        { ts: '1:20', text: 'check out 1:20 his face though XD'},
-        // { ts: '3:14', text: 'test 3:14'},
-        { ts: '3:49', text: 'Click this ====> 3:49 for the best part of the video'},
-        { ts: '3:51', text: 'check 3:51'},
-    ]))
-
-    describe('Video with preview', () => test('https://www.youtube.com/watch?v=vUcX6wBPqCQ', [
+    describe('Timestamps in comments', () => test('https://www.youtube.com/watch?v=vUcX6wBPqCQ', [
         { ts: '2:29', text: "So effortlessly catched 2:29" },
         { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
     ]))
+
+    describe('Timestamps in description', () => test('https://www.youtube.com/watch?v=KhaTy5sCdJM', [
+        { ts: '01:04', text: "01:04 Design" },
+        { ts: '02:41', text: "02:41 Input Devices" },
+        { ts: '03:37', text: "03:37 Display" },
+        { ts: '05:08', text: "05:08 Sound " },
+        { ts: '06:02', text: "06:02 Performance" },
+        { ts: '06:59', text: "06:59 Heat & Noise" },
+        { ts: '08:49', text: "08:49 Battery" },
+        // { ts: '', text: "09: Software" },
+        { ts: '10:07', text: "10:07 Pros & Cons" },
+        { ts: '11:09', text: "11:09 Conclusion" },
+    ]))
+
+    describe('Timestamps. Timestamps everywhere', () => {
+        const description = "This is a speedrun of Tony Hawk's Underground by Fivves from Summer Games Done Quick 2016. The run starts at 15:33.\r"
+        test('https://www.youtube.com/watch?v=iQ6rolvCYW4', [
+            { ts: '15:33', text: description },//{ ts: '15:32', text: "15:32 . . . . . your welcome" },
+            { ts: '15:33', text: description },
+            { ts: '27:00', text: "27:00 Admiring the great Tony Hawk." },
+            { ts: '31:07', text: "31:07 Rip headphone users" },
+        ])
+    })
 
     describe('Multiple timestamps in one comment', () => test('https://www.youtube.com/watch?v=NkSpiq5E9d8', [
         { ts: '7:01', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
