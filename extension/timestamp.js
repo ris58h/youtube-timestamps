@@ -1,5 +1,14 @@
-function extractTimestamps(text) {
-    return (text.match(/((\d?\d:)?\d\d|\d):\d\d/g) || [])
+function findTimestamps(text) {
+    const result = []
+    const timestampPattern = /((\d?\d:)?\d\d|\d):\d\d/g
+    let match
+    while ((match = timestampPattern.exec(text))) {
+        result.push({
+            from: match.index,
+            to: timestampPattern.lastIndex
+        })
+    }
+    return result
 }
 
 function parseTimestamp(ts) {
@@ -19,7 +28,7 @@ function parseTimestamp(ts) {
 // Modules aren't supported in Web Extensions.
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        extractTimestamps,
+        findTimestamps,
         parseTimestamp
     }
 }

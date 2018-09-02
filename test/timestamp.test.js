@@ -2,32 +2,37 @@ const ts = require('../extension/timestamp')
 const assert = require('assert').strict
 
 describe('timestamp', () => {
-    describe('extractTimestamps', () => {
+    describe('findTimestamps', () => {
         it('no timestamp', () => {
-            assert.deepEqual(ts.extractTimestamps('some text'), [])
+            assert.deepEqual(_findTimestamps('some text'), [])
         })
 
         it('just timestamp', () => {
-            assert.deepEqual(ts.extractTimestamps('0:14'), ['0:14'])
-            assert.deepEqual(ts.extractTimestamps('13:14'), ['13:14'])
-            assert.deepEqual(ts.extractTimestamps('2:13:14'), ['2:13:14'])
-            assert.deepEqual(ts.extractTimestamps('12:13:14'), ['12:13:14'])
+            assert.deepEqual(_findTimestamps('0:14'), ['0:14'])
+            assert.deepEqual(_findTimestamps('13:14'), ['13:14'])
+            assert.deepEqual(_findTimestamps('2:13:14'), ['2:13:14'])
+            assert.deepEqual(_findTimestamps('12:13:14'), ['12:13:14'])
         })
 
         it('multiple timestamps', () => {
-            assert.deepEqual(ts.extractTimestamps('0:14 13:14 2:13:14 12:13:14'), ['0:14', '13:14', '2:13:14', '12:13:14'])
+            assert.deepEqual(_findTimestamps('0:14 13:14 2:13:14 12:13:14'), ['0:14', '13:14', '2:13:14', '12:13:14'])
         })
 
         it('multiple timestamps with text around', () => {
-            assert.deepEqual(ts.extractTimestamps('text0:14text13:14text2:13:14text12:13:14text'), ['0:14', '13:14', '2:13:14', '12:13:14'])
-            assert.deepEqual(ts.extractTimestamps('-0:14-13:14-2:13:14-12:13:14-'), ['0:14', '13:14', '2:13:14', '12:13:14'])
+            assert.deepEqual(_findTimestamps('text0:14text13:14text2:13:14text12:13:14text'), ['0:14', '13:14', '2:13:14', '12:13:14'])
+            assert.deepEqual(_findTimestamps('-0:14-13:14-2:13:14-12:13:14-'), ['0:14', '13:14', '2:13:14', '12:13:14'])
         })
 
         it.skip('invalid timestamps', () => {
-            assert.deepEqual(ts.extractTimestamps('111:12:13'), [])
-            assert.deepEqual(ts.extractTimestamps('11:60:13'), [])
-            assert.deepEqual(ts.extractTimestamps('11:12:60'), [])
+            assert.deepEqual(_findTimestamps('111:12:13'), [])
+            assert.deepEqual(_findTimestamps('11:60:13'), [])
+            assert.deepEqual(_findTimestamps('11:12:60'), [])
         })
+
+        //TODO Actually positions (not substrings) should be checked.
+        function _findTimestamps(text) {
+            return ts.findTimestamps(text).map(p => text.substring(p.from, p.to))
+        }
     })
 
     describe('parseTimestamp', () => {

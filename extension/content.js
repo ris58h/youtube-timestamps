@@ -10,27 +10,14 @@ window.addEventListener('spfdone', navListener)
 
 main()
 
+const MAX_TEXT_LENGTH = 128
+
 function main() {
     const videoId = getVideoId()
     if (videoId) {
         fetchComments(videoId, items => {
-            const timeComments = []
-            for (const item of items) {
-                const commentSnippet = item.snippet.topLevelComment.snippet
-                const timestamps = extractTimestamps(commentSnippet.textOriginal)
-                for (const ts of timestamps) {
-                    const time = parseTimestamp(ts)
-                    if (time) {
-                        timeComments.push({
-                            authorAvatar: commentSnippet.authorProfileImageUrl,
-                            authorName: commentSnippet.authorDisplayName,
-                            ts,
-                            time,
-                            text: commentSnippet.textOriginal
-                        })
-                    }
-                }
-            }
+            const commentSnippets = items.map(item => item.snippet.topLevelComment.snippet)
+            const timeComments = getTimeComments(commentSnippets)
             if (timeComments.length > 0) {
                 timeComments.sort((a, b) => a.time - b.time)
                 fetchVideo(videoId, video => {
@@ -43,6 +30,44 @@ function main() {
             }
         })
     }
+}
+
+function getTimeComments(commentSnippets) {
+    const timeComments = []
+    for (const commentSnippet of commentSnippets) {
+        const timestamps = getTimestampContexts(commentSnippet.textOriginal)
+        for (const ts of timestamps) {
+            timeComments.push({
+                authorAvatar: commentSnippet.authorProfileImageUrl,
+                authorName: commentSnippet.authorDisplayName,
+                timestamp: ts.timestamp,
+                time: ts.time,
+                text: commentSnippet.textOriginal.length > MAX_TEXT_LENGTH ? ts.line : commentSnippet.textOriginal
+            })
+        }
+    }
+    return timeComments
+}
+
+function getTimestampContexts(text) {
+    const result = []
+    const lines = text.split('\n')
+    for (const line of lines) {
+        const positions = findTimestamps(line)
+        for (const position of positions) {
+            const timestamp = line.substring(position.from, position.to)
+            const time = parseTimestamp(timestamp)
+            if (!time) {
+                continue
+            }
+            result.push({
+                line,
+                time,
+                timestamp
+            })
+        }
+    }
+    return result
 }
 
 function getVideoId() {
@@ -142,7 +167,7 @@ function showPreview(timeComment) {
     preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
     const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
     textNode.innerHTML = ''
-    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.ts))
+    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
 }
 
 function highlightTextFragment(text, fragment) {
