@@ -64,7 +64,7 @@ function getTimestampContexts(text) {
         for (const position of positions) {
             const timestamp = line.substring(position.from, position.to)
             const time = parseTimestamp(timestamp)
-            if (!time) {
+            if (time === null) {
                 continue
             }
             result.push({

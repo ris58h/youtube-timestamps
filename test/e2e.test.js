@@ -55,6 +55,11 @@ describe('e2e', () => {
         { ts: '12:15', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
     ]))
 
+    describe('Video with 0:00 timestamp', () => test('https://www.youtube.com/watch?v=TsZZ6QKkz1s', [
+        { ts: '0:00', text: "0:00 i have the same rug :P" },
+        { ts: '0:49', text: "0:49 what was that called where you stepped off his board right before a curb and got back on. Also, how difficult is it" },
+    ]))
+
     describe('Embedded video', () => test(`file://${process.cwd()}/test/embedded.html`, [
         { ts: '2:29', text: "So effortlessly catched 2:29" },
         { ts: '5:13', text: "5:13 Daaaang! Dissing your wife XD" },
