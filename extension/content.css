@@ -27,12 +27,12 @@
     background-color: white;
     bottom: 4px;
     width: 160px;
+    padding: 4px;
 }
 
 .__youtube-timestamps__preview__author {
     display: flex;
     align-items: center;
-    padding: 2px;
 }
 
 .__youtube-timestamps__preview__avatar {
