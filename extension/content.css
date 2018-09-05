@@ -23,9 +23,9 @@
 .__youtube-timestamps__preview {
     position: absolute;
     background-color: white;
-    bottom: 4px;
+    bottom: 8px;
     box-sizing: border-box;
-    padding: 4px;
+    padding: 8px;
 }
 
 .__youtube-timestamps__preview__author {
@@ -39,14 +39,14 @@
 }
 
 .__youtube-timestamps__preview__name {
-    margin-left: 4px;
+    margin-left: 8px;
     font-size: 1.3rem;
     font-weight: 500;
     color: rgb(17, 17, 17);
 }
 
 .__youtube-timestamps__preview__text {
-    margin-top: 4px;
+    margin-top: 8px;
     font-size: 1.4rem;
     font-weight: 400;
     color: rgb(17, 17, 17);
