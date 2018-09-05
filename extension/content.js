@@ -183,12 +183,29 @@ function showPreview(timeComment) {
         preview.appendChild(textElement)
     }
     preview.style.display = ''
-    preview.style.width = parent.querySelector('.ytp-tooltip-bg').style.width
     preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
     preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
     const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
     textNode.innerHTML = ''
     textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
+
+    const bgWidth = parent.querySelector('.ytp-tooltip-bg').style.width.slice(0, -2)
+    const previewWidth = bgWidth || 160
+    const halfPreviewWidth = previewWidth / 2
+    const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
+    const pivot = preview.parentElement.getBoundingClientRect().left
+    const minPivot = playerRect.left + halfPreviewWidth
+    const maxPivot = playerRect.right - halfPreviewWidth
+    let previewLeft
+    if (pivot < minPivot) {
+        previewLeft = playerRect.left - pivot
+    } else if (pivot > maxPivot) {
+        previewLeft = -previewWidth + (playerRect.right - pivot)
+    } else {
+        previewLeft = -halfPreviewWidth
+    }
+    preview.style.width = previewWidth + 'px'
+    preview.style.left = previewLeft + 'px'
 }
 
 function highlightTextFragment(text, fragment) {

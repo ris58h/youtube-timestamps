@@ -17,16 +17,14 @@
 
 .__youtube-timestamps__preview-wrapper {
     position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: center;
+    left: 50%;
 }
 
 .__youtube-timestamps__preview {
     position: absolute;
     background-color: white;
     bottom: 4px;
-    width: 160px;
+    box-sizing: border-box;
     padding: 4px;
 }
 
@@ -38,10 +36,10 @@
 .__youtube-timestamps__preview__avatar {
     width: 16px;
     height: 16px;
-    margin-right: 4px;
 }
 
 .__youtube-timestamps__preview__name {
+    margin-left: 4px;
     font-size: 1.3rem;
     font-weight: 500;
     color: rgb(17, 17, 17);
