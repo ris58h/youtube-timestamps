@@ -80,8 +80,7 @@ describe('e2e', () => {
 
             const ad = await frame.$('.videoAdUi')
             if (ad) {
-                await frame.waitFor('.videoAdUiSkipButton', { visible: true })
-                await frame.click('.videoAdUiSkipButton')
+                await page.$eval('video', v => v.currentTime = 100500)
             }
             await frame.waitFor('.__youtube-timestamps__stamp')
         })
