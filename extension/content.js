@@ -189,8 +189,8 @@ function showPreview(timeComment) {
     textNode.innerHTML = ''
     textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
 
-    const bgWidth = parent.querySelector('.ytp-tooltip-bg').style.width.slice(0, -2)
-    const previewWidth = bgWidth || 160
+    const bgWidth = parent.querySelector('.ytp-tooltip-bg').style.width
+    const previewWidth = bgWidth.endsWith('px') ? parseFloat(bgWidth) : 160
     const halfPreviewWidth = previewWidth / 2
     const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
     const pivot = preview.parentElement.getBoundingClientRect().left
