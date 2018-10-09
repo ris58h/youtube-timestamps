@@ -49,10 +49,10 @@ describe('e2e', () => {
     describe('Multiple timestamps in one comment', () => test('https://www.youtube.com/watch?v=NkSpiq5E9d8', [
         { ts: '7:01', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
         { ts: '8:23', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
-        { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },//TODO collision { ts: '10:27', text: "10:27 Ооооооооо" },
-        { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },//TODO collision { ts: '10:27', text: "10:27, 10 часовую версию в студию!" },
-        { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },//TODO collision { ts: '10:25', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
-        { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
+        { ts: '10:27', text: "10:27, 10 часовую версию в студию!" },//TODO { ts: '10:27', text: "10:27 Ооооооооо" },
+        { ts: '10:27', text: "10:27, 10 часовую версию в студию!" },//TODO { ts: '10:27', text: "10:27, 10 часовую версию в студию!" },
+        { ts: '10:27', text: "10:27, 10 часовую версию в студию!" },//TODO { ts: '10:25', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
+        { ts: '10:27', text: "10:27, 10 часовую версию в студию!" },//TODO { ts: '10:28', text: "10:25 - 10:28 комментаторы в терцию спели, ахахахахха." },
         { ts: '12:15', text: "Голы:\n7:01\n8:23\n12:15\nНе благодарите." },
     ]))
 
@@ -86,10 +86,14 @@ describe('e2e', () => {
         })
 
         it('timestamps', async () => {
+            await frame.waitForFunction((length) => {
+                return document.querySelectorAll('.__youtube-timestamps__stamp').length >= length
+            }, { polling : "mutation" }, expectedTimeComments.length)
             const ts = await frame.$$('.__youtube-timestamps__stamp')
             expect(ts.length).to.equal(expectedTimeComments.length)
-            for (let i = 0; i < ts.length; i++) {
-                const t = ts[i]
+            const sortedTs = await asyncSort(ts, async e => await left(frame, e))
+            for (let i = 0; i < sortedTs.length; i++) {
+                const t = sortedTs[i]
                 const expected = expectedTimeComments[i]
                 await t.hover()
                 await frame.waitFor('.__youtube-timestamps__preview', { visible: true })
@@ -103,6 +107,20 @@ describe('e2e', () => {
         after(async () => {
             await page.close()
         })
+    }
+
+    async function asyncSort(es, f) {
+        const wrappers = []
+        for (const e of es) {
+            const fe = await f(e)
+            wrappers.push({e, fe})
+        }
+        wrappers.sort((a, b) => a.fe - b.fe)
+        return wrappers.map(w => w.e)
+    }
+
+    async function left(frame, element) {
+        return await frame.evaluate(e => e.getBoundingClientRect().left, element)
     }
 
     async function createPage(url) {

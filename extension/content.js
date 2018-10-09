@@ -1,5 +1,5 @@
 const navListener = function () {
-    removeTimeComments()
+    removeBar()
     main()
 }
 window.addEventListener('popstate', navListener)
@@ -14,32 +14,40 @@ function main() {
     const videoId = getVideoId()
     if (videoId) {
         Promise.all([fetchComments(videoId), fetchVideo(videoId)]).then(results => {
-            const videoIdAfterRequest = getVideoId()
-            if (videoId !== videoIdAfterRequest) {
+            if (videoId !== getVideoId()) {
                 return
             }
-            const timeComments = []
-            for (const item of results[0]) {
+
+            const commentItems = results[0]
+            const videoItem = results[1]
+            const videoDuration = parseDuration(videoItem.contentDetails.duration)
+
+            const commentsTcs = []
+            for (const item of commentItems) {
                 const cs = item.snippet.topLevelComment.snippet
                 for (const tsContext of getTimestampContexts(cs.textOriginal)) {
-                    timeComments.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, cs.textOriginal, tsContext))
+                    commentsTcs.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, cs.textOriginal, tsContext))
                 }
             }
-            const videoItem = results[1]
+            showTimeComments(commentsTcs, videoDuration)
+
             const videoDescription = videoItem.snippet.description
             const videoTsContexts = getTimestampContexts(videoDescription)
-            const p = videoTsContexts.length === 0 ? Promise.resolve() : fetchChannel(videoItem.snippet.channelId).then(channelItem => {
-                const channelAvatar = channelItem.snippet.thumbnails.default.url
-                const channelTitle = channelItem.snippet.title
-                for (const tsContext of videoTsContexts) {
-                    timeComments.push(newTimeComment(channelAvatar, channelTitle, videoDescription, tsContext))
-                }
-            })
-            p.then(function () {
-                timeComments.sort((a, b) => a.time - b.time)
-                const videoDuration = parseDuration(videoItem.contentDetails.duration)
-                showTimeComments(timeComments, videoDuration)
-            })
+            if (videoTsContexts.length > 0) {
+                fetchChannel(videoItem.snippet.channelId).then(channelItem => {
+                    if (videoId !== getVideoId()) {
+                        return
+                    }
+
+                    const channelAvatar = channelItem.snippet.thumbnails.default.url
+                    const channelTitle = channelItem.snippet.title
+                    const descriptionTcs = []
+                    for (const tsContext of videoTsContexts) {
+                        descriptionTcs.push(newTimeComment(channelAvatar, channelTitle, videoDescription, tsContext))
+                    }
+                    showTimeComments(descriptionTcs, videoDuration)
+                })
+            }
         })
     }
 }
@@ -122,9 +130,7 @@ function fetchChannel(channelId) {
 }
 
 function showTimeComments(timeComments, videoDuration) {
-    const container = document.querySelector('.ytp-progress-list')
-    const bar = document.createElement('div')
-    bar.classList.add('__youtube-timestamps__bar')
+    const bar = getOrCreateBar()
     for (const tc of timeComments) {
         if (tc.time > videoDuration) {
             continue
@@ -142,10 +148,20 @@ function showTimeComments(timeComments, videoDuration) {
             hidePreview()
         })
     }
-    container.appendChild(bar)
 }
 
-function removeTimeComments() {
+function getOrCreateBar() {
+    let bar = document.querySelector('.__youtube-timestamps__bar')
+    if (!bar) {
+        bar = document.createElement('div')
+        bar.classList.add('__youtube-timestamps__bar')
+        const container = document.querySelector('.ytp-progress-list')
+        container.appendChild(bar)
+    }
+    return bar
+}
+
+function removeBar() {
     const bar = document.querySelector('.__youtube-timestamps__bar')
     if (bar) {
         bar.remove()
