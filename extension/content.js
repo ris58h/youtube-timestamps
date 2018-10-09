@@ -225,7 +225,7 @@ function showPreview(timeComment) {
 }
 
 function highlightTextFragment(text, fragment) {
-    var result = document.createDocumentFragment();
+    const result = document.createDocumentFragment()
     const parts = text.split(fragment)
     for (let i = 0; i < parts.length; i++) {
         const part = parts[i]
@@ -264,24 +264,24 @@ function parseParams(href) {
 }
 
 function parseDuration(duration) {
-    const matches = duration.match(/[0-9]+[HMS]/g);
-    let seconds = 0;
+    const matches = duration.match(/[0-9]+[HMS]/g)
+    let seconds = 0
     matches.forEach(function (part) {
-        const unit = part.charAt(part.length - 1);
-        const amount = parseInt(part.slice(0, -1));
+        const unit = part.charAt(part.length - 1)
+        const amount = parseInt(part.slice(0, -1))
         switch (unit) {
             case 'H':
-                seconds += amount * 60 * 60;
-                break;
+                seconds += amount * 60 * 60
+                break
             case 'M':
-                seconds += amount * 60;
-                break;
+                seconds += amount * 60
+                break
             case 'S':
-                seconds += amount;
-                break;
+                seconds += amount
+                break
             default:
             // noop
         }
-    });
-    return seconds;
+    })
+    return seconds
 }
