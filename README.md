@@ -5,3 +5,5 @@ YouTube Timestamps extension shows timestamps from comments on timeline.
 [Chrome](https://chrome.google.com/webstore/detail/youtube-timestamps/fjchmkcdmgeimkholkgodkejnikeklmh)
 
 [Firefox](https://addons.mozilla.org/en-US/firefox/addon/youtube-timestamps/)
+
+![Screenshot](screenshot.png)
