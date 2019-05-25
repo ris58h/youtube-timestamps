@@ -5,11 +5,11 @@
         "dist": "node dist.js"
     },
     "devDependencies": {
-        "archiver": "^2.1.1",
+        "archiver": "^3.0.0",
         "chai": "^4.2.0",
-        "eslint": "^4.19.1",
+        "eslint": "^5.16.0",
         "fs-extra": "^6.0.1",
         "mocha": "^5.2.0",
-        "puppeteer": "^1.12.2"
+        "puppeteer": "^1.17.0"
     }
 }
