@@ -26,7 +26,7 @@ function main() {
             for (const item of commentItems) {
                 const cs = item.snippet.topLevelComment.snippet
                 for (const tsContext of getTimestampContexts(cs.textOriginal)) {
-                    commentsTcs.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, cs.textOriginal, tsContext))
+                    commentsTcs.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, tsContext))
                 }
             }
             showTimeComments(commentsTcs, videoDuration)
@@ -43,7 +43,7 @@ function main() {
                     const channelTitle = channelItem.snippet.title
                     const descriptionTcs = []
                     for (const tsContext of videoTsContexts) {
-                        descriptionTcs.push(newTimeComment(channelAvatar, channelTitle, videoDescription, tsContext))
+                        descriptionTcs.push(newTimeComment(channelAvatar, channelTitle, tsContext))
                     }
                     showTimeComments(descriptionTcs, videoDuration)
                 })
@@ -54,32 +54,45 @@ function main() {
 
 const MAX_TEXT_LENGTH = 128
 
-function newTimeComment(authorAvatar, authorName, text, tsContext) {
+function newTimeComment(authorAvatar, authorName, tsContext) {
     return {
         authorAvatar,
         authorName,
         timestamp: tsContext.timestamp,
         time: tsContext.time,
-        text: text.length > MAX_TEXT_LENGTH ? tsContext.line : text
+        text: tsContext.text
     }
 }
 
 function getTimestampContexts(text) {
     const result = []
     const lines = text.split('\n')
-    for (const line of lines) {
-        const positions = findTimestamps(line)
-        for (const position of positions) {
-            const timestamp = line.substring(position.from, position.to)
-            const time = parseTimestamp(timestamp)
-            if (time === null) {
-                continue
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (line) {
+            const positions = findTimestamps(line)
+            for (const position of positions) {
+                const timestamp = line.substring(position.from, position.to)
+                const time = parseTimestamp(timestamp)
+                if (time === null) {
+                    continue
+                }
+                let contextText
+                if (text.length > MAX_TEXT_LENGTH) {
+                    if (timestamp === line && i + 1 < lines.length && lines[i + 1]) {
+                        contextText = line + '\n' + lines[i + 1]
+                    } else {
+                        contextText = line
+                    }
+                } else {
+                    contextText = text
+                }
+                result.push({
+                    text: contextText,
+                    time,
+                    timestamp
+                })
             }
-            result.push({
-                line,
-                time,
-                timestamp
-            })
         }
     }
     return result
