@@ -13,7 +13,7 @@ main()
 function main() {
     const videoId = getVideoId()
     if (videoId) {
-        Promise.all([fetchComments(videoId), fetchVideo(videoId)]).then(results => {
+        Promise.all([fetchAllComments(videoId), fetchVideo(videoId)]).then(results => {
             if (videoId !== getVideoId()) {
                 return
             }
@@ -109,14 +109,35 @@ function getVideoId() {
     }
 }
 
-function fetchComments(videoId) {
-    const part = 'snippet'
-    const fields = 'items(snippet(topLevelComment(snippet)))'
-    const order = 'relevance'
-    return fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&key=${API_KEY}`)
-    .then(function (response) {
-        return response.json().then(function (data) {
-            return data.items
+function fetchAllComments(videoId) {
+    return new Promise(async (resolve) => {
+        var items = [];
+        await fetchComments(videoId, items).then((res) => {
+            return resolve(res);
+        })
+    })
+}
+
+function fetchComments(videoId, items, pageToken) {
+    return new Promise((resolve) => {
+        const part = 'snippet'
+        const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
+        const order = 'relevance'
+        const maxResults = 100
+        var opts = '';
+        if (pageToken) {
+            opts = `&pageToken=${pageToken}`
+        }
+
+        fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}` + opts)
+        .then(function (response) {
+            response.json().then(async function (data) {
+                if(data.nextPageToken) {
+                    return resolve(fetchComments(videoId, items.concat(data.items), data.nextPageToken))
+                }
+                else 
+                    return resolve(items.concat(data.items))
+            })
         })
     })
 }
