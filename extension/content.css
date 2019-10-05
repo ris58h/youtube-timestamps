@@ -62,3 +62,21 @@
 .__youtube-timestamps__preview__text-stamp {
     color: rgb(6, 95, 212);
 }
+
+#player-container {
+    width: 80% !important;
+}
+
+.timestamps {
+    position: relative;
+    width: 20%;
+    left: 80%;
+    height: calc((9 / 16) * 100vw);
+    max-height: calc(100vh - 169px);
+    min-height: 480px;
+    background: #000;
+}
+
+.timestamp-elem {
+    color: white;
+}

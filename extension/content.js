@@ -17,7 +17,6 @@ function main() {
             if (videoId !== getVideoId()) {
                 return
             }
-
             const commentItems = results[0]
             const videoItem = results[1]
             const videoDuration = parseDuration(videoItem.contentDetails.duration)
@@ -29,6 +28,8 @@ function main() {
                     commentsTcs.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, tsContext))
                 }
             }
+
+            showSidebarComments(commentsTcs)
             showTimeComments(commentsTcs, videoDuration)
 
             const videoDescription = videoItem.snippet.description
@@ -113,33 +114,71 @@ function fetchComments(videoId) {
     const fields = 'items(snippet(topLevelComment(snippet)))'
     const order = 'relevance'
     return fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&key=${API_KEY}`)
-        .then(function (response) {
-            return response.json().then(function (data) {
-                return data.items
-            })
+    .then(function (response) {
+        return response.json().then(function (data) {
+            return data.items
         })
+    })
 }
 
 function fetchVideo(videoId) {
     const part = 'snippet,contentDetails'
     const fields = 'items(snippet(description,channelId),contentDetails(duration))'
     return fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}&key=${API_KEY}`)
-        .then(function (response) {
-            return response.json().then(function (data) {
-                return data.items[0]
-            })
+    .then(function (response) {
+        return response.json().then(function (data) {
+            return data.items[0]
         })
+    })
 }
 
 function fetchChannel(channelId) {
     const part = 'snippet'
     const fields = 'items(snippet(title,thumbnails(default)))'
     return fetch(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}&key=${API_KEY}`)
-        .then(function (response) {
-            return response.json().then(function (data) {
-                return data.items[0]
-            })
+    .then(function (response) {
+        return response.json().then(function (data) {
+            return data.items[0]
         })
+    })
+}
+
+function showSidebarComments(timeComments) {
+    const video = document.querySelector("video")
+    const sidebar = getOrCreateSidebar()
+
+    timeComments.sort((a, b) => a.time > b.time ? 1 : -1);
+
+    for (const tc of timeComments) {
+        const elem = document.createElement('div')
+        elem.classList.add('timestamp-elem')
+        const txt = document.createElement('span')
+        txt.textContent = tc.timestamp + ' : ' + tc.text;
+        elem.appendChild(txt);
+        sidebar.appendChild(elem);
+
+        elem.addEventListener('click', () => {
+            video.currentTime = tc.time;
+            video.play();
+        })
+    }
+}
+
+function getOrCreateSidebar() {
+    let sidebar = document.querySelector('.timestamps')
+    if (!sidebar) {
+        sidebar = document.createElement('div')
+        sidebar.classList.add('timestamps')
+        const container = document.getElementById('player-theater-container')
+        container.appendChild(sidebar);
+    } else {
+        var child = sidebar.lastElementChild;  
+        while (child) { 
+            sidebar.removeChild(child); 
+            child = sidebar.lastElementChild; 
+        }
+    }
+    return sidebar;
 }
 
 function showTimeComments(timeComments, videoDuration) {
@@ -284,14 +323,14 @@ function parseDuration(duration) {
         const amount = parseInt(part.slice(0, -1))
         switch (unit) {
             case 'H':
-                seconds += amount * 60 * 60
-                break
+            seconds += amount * 60 * 60
+            break
             case 'M':
-                seconds += amount * 60
-                break
+            seconds += amount * 60
+            break
             case 'S':
-                seconds += amount
-                break
+            seconds += amount
+            break
             default:
             // noop
         }
