@@ -112,7 +112,7 @@ function fetchAllComments(videoId) {
     return new Promise(async (resolve) => {
         var items = []
         await fetchComments(videoId, items).then((res) => {
-            return resolve(res);
+            return resolve(res)
         })
     })
 }
