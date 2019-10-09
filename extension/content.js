@@ -124,7 +124,7 @@ function fetchComments(videoId, items, pageToken) {
         const order = 'relevance'
         const maxResults = 100
 
-        var opts = '';
+        var opts = ''
         if (pageToken) {
             opts = `&pageToken=${pageToken}`
         }
