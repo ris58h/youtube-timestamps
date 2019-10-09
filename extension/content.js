@@ -132,7 +132,7 @@ function fetchComments(videoId, items, pageToken) {
         fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}` + opts)
         .then(function (response) {
             response.json().then(async function (data) {
-                if(data.nextPageToken) {
+                if (data.nextPageToken) {
                     return resolve(fetchComments(videoId, items.concat(data.items), data.nextPageToken))
                 }
                 else {
