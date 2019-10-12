@@ -13,7 +13,7 @@ main()
 function main() {
     const videoId = getVideoId()
     if (videoId) {
-        Promise.all([fetchComments(videoId), fetchVideo(videoId)]).then(results => {
+        Promise.all([fetchAllComments(videoId), fetchVideo(videoId)]).then(results => {
             if (videoId !== getVideoId()) {
                 return
             }
@@ -108,16 +108,43 @@ function getVideoId() {
     }
 }
 
-function fetchComments(videoId) {
-    const part = 'snippet'
-    const fields = 'items(snippet(topLevelComment(snippet)))'
-    const order = 'relevance'
-    return fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&key=${API_KEY}`)
+function fetchAllComments(videoId) {
+    return new Promise(async (resolve) => {
+        let items = []
+        let numberOfPagesToFetch = 3
+
+        await fetchComments(videoId, numberOfPagesToFetch, items).then((res) => {
+            return resolve(res)
+        })
+    })
+}
+
+function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
+    return new Promise((resolve) => {
+        const part = 'snippet'
+        const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
+        const order = 'relevance'
+        const maxResults = 100
+
+        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}`
+
+        if (pageToken) {
+            url = url + `&pageToken=${pageToken}`
+        }
+
+        fetch(url)
         .then(function (response) {
-            return response.json().then(function (data) {
-                return data.items
+            response.json().then(async function (data) {
+                items.push(...data.items)
+                if (data.nextPageToken && numberPageLeftFetching > 0) {
+                    return resolve(fetchComments(videoId, --numberPageLeftFetching, items, data.nextPageToken))
+                }
+                else {
+                    return resolve(items)
+                }
             })
         })
+    })
 }
 
 function fetchVideo(videoId) {
