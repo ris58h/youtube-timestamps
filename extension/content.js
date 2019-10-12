@@ -114,7 +114,7 @@ function fetchAllComments(videoId) {
         let numberOfPagesToFetch = 5;
 
         await fetchComments(videoId, numberOfPagesToFetch, items).then((res) => {
-            return resolve(res);
+            return resolve(res)
         })
     })
 }
