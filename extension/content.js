@@ -127,6 +127,7 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
         const maxResults = 100
 
         let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}`;
+
         if (pageToken) {
             url = url + `&pageToken=${pageToken}`
         }
