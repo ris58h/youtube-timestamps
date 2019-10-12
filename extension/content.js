@@ -1,3 +1,7 @@
+const NUMBER_OF_PAGES_TO_FETCH = 3
+const PAGE_SIZE = 100
+const MAX_TEXT_LENGTH = 128
+
 const navListener = function () {
     removeBar()
     main()
@@ -51,8 +55,6 @@ function main() {
         })
     }
 }
-
-const MAX_TEXT_LENGTH = 128
 
 function newTimeComment(authorAvatar, authorName, tsContext) {
     return {
@@ -111,9 +113,7 @@ function getVideoId() {
 function fetchAllComments(videoId) {
     return new Promise(async (resolve) => {
         let items = []
-        let numberOfPagesToFetch = 3
-
-        await fetchComments(videoId, numberOfPagesToFetch, items).then((res) => {
+        await fetchComments(videoId, NUMBER_OF_PAGES_TO_FETCH, items).then((res) => {
             return resolve(res)
         })
     })
@@ -124,7 +124,7 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
         const part = 'snippet'
         const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
         const order = 'relevance'
-        const maxResults = 100
+        const maxResults = PAGE_SIZE
 
         let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}`
 
@@ -138,8 +138,7 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
                 items.push(...data.items)
                 if (data.nextPageToken && numberPageLeftFetching > 0) {
                     return resolve(fetchComments(videoId, --numberPageLeftFetching, items, data.nextPageToken))
-                }
-                else {
+                } else {
                     return resolve(items)
                 }
             })
