@@ -110,33 +110,36 @@ function getVideoId() {
 
 function fetchAllComments(videoId) {
     return new Promise(async (resolve) => {
-        var items = [];
-        await fetchComments(videoId, items).then((res) => {
+        let items = [];
+        let numberOfPagesToFetch = 5;
+
+        await fetchComments(videoId, numberOfPagesToFetch, items).then((res) => {
             return resolve(res);
         })
     })
 }
 
-function fetchComments(videoId, items, pageToken) {
+function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
     return new Promise((resolve) => {
         const part = 'snippet'
         const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
         const order = 'relevance'
         const maxResults = 100
 
-        var opts = '';
+        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}`;
         if (pageToken) {
-            opts = `&pageToken=${pageToken}`
+            url = url + `&pageToken=${pageToken}`
         }
 
-        fetch(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}` + opts)
+        fetch(url)
         .then(function (response) {
             response.json().then(async function (data) {
-                if(data.nextPageToken) {
-                    return resolve(fetchComments(videoId, items.concat(data.items), data.nextPageToken))
+                items.push(...data.items)
+                if(data.nextPageToken && numberPageLeftFetching > 0) {
+                    return resolve(fetchComments(videoId, --numberPageLeftFetching, items, data.nextPageToken))
                 }
                 else {
-                    return resolve(items.concat(data.items))
+                    return resolve(items)
                 }
             })
         })
