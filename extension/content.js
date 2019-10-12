@@ -136,7 +136,7 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
         .then(function (response) {
             response.json().then(async function (data) {
                 items.push(...data.items)
-                if(data.nextPageToken && numberPageLeftFetching > 0) {
+                if (data.nextPageToken && numberPageLeftFetching > 0) {
                     return resolve(fetchComments(videoId, --numberPageLeftFetching, items, data.nextPageToken))
                 }
                 else {
