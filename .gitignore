@@ -2,3 +2,4 @@
 node_modules
 dist
 extension/secret.js
+.DS_Store
