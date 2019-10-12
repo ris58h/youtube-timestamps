@@ -110,7 +110,7 @@ function getVideoId() {
 
 function fetchAllComments(videoId) {
     return new Promise(async (resolve) => {
-        let items = [];
+        let items = []
         let numberOfPagesToFetch = 3
 
         await fetchComments(videoId, numberOfPagesToFetch, items).then((res) => {
