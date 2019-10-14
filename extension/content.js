@@ -125,8 +125,9 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
         const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
         const order = 'relevance'
         const maxResults = PAGE_SIZE
+        const apiKey = getApiKey()
 
-        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${API_KEY}`
+        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${apiKey}`
 
         if (pageToken) {
             url = url + `&pageToken=${pageToken}`
@@ -149,7 +150,8 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
 function fetchVideo(videoId) {
     const part = 'snippet,contentDetails'
     const fields = 'items(snippet(description,channelId),contentDetails(duration))'
-    return fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}&key=${API_KEY}`)
+    const apiKey = getApiKey()
+    return fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}&key=${apiKey}`)
         .then(function (response) {
             return response.json().then(function (data) {
                 return data.items[0]
@@ -160,7 +162,8 @@ function fetchVideo(videoId) {
 function fetchChannel(channelId) {
     const part = 'snippet'
     const fields = 'items(snippet(title,thumbnails(default)))'
-    return fetch(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}&key=${API_KEY}`)
+    const apiKey = getApiKey()
+    return fetch(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}&key=${apiKey}`)
         .then(function (response) {
             return response.json().then(function (data) {
                 return data.items[0]
@@ -323,4 +326,9 @@ function parseDuration(duration) {
         }
     })
     return seconds
+}
+
+function getApiKey() {
+    const randomApiKeyIndex = Math.floor(Math.random() * API_KEYS.length)
+    return API_KEYS[randomApiKeyIndex]
 }
