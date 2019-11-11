@@ -12,6 +12,7 @@ describe('timestamp', () => {
             assert.deepEqual(_findTimestamps('13:14'), ['13:14'])
             assert.deepEqual(_findTimestamps('2:13:14'), ['2:13:14'])
             assert.deepEqual(_findTimestamps('12:13:14'), ['12:13:14'])
+            assert.deepEqual(_findTimestamps('2:4:42'), ['2:4:42'])
         })
 
         it('multiple timestamps', () => {
@@ -42,6 +43,7 @@ describe('timestamp', () => {
             assert.equal(ts.parseTimestamp('1:00'), 60)
             assert.equal(ts.parseTimestamp('10:00'), 10 * 60)
             assert.equal(ts.parseTimestamp('1:10:00'), 60 * 60 + 10 * 60)
+            assert.equal(ts.parseTimestamp('2:4:42'), 2 * 60 * 60 + 4 * 60 + 42)
             assert.equal(ts.parseTimestamp('11:10:00'), 11 * 60 * 60 + 10 * 60)
         })
     })

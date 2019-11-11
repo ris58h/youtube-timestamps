@@ -1,6 +1,6 @@
 function findTimestamps(text) {
     const result = []
-    const timestampPattern = /((\d?\d:)?\d\d|\d):\d\d/g
+    const timestampPattern = /(\d?\d:)?(\d?\d:)\d\d/g
     let match
     while ((match = timestampPattern.exec(text))) {
         result.push({
