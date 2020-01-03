@@ -1,6 +1,7 @@
 const NUMBER_OF_PAGES_TO_FETCH = 1
 const PAGE_SIZE = 100
 const MAX_TEXT_LENGTH = 128
+const INVALID_TIMES = []
 
 const navListener = function () {
     removeBar()
@@ -129,17 +130,15 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
         const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
         const order = 'relevance'
         const maxResults = PAGE_SIZE
-        const apiKey = getApiKey()
-
-        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}&key=${apiKey}`
+        
+        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}`
 
         if (pageToken) {
             url = url + `&pageToken=${pageToken}`
         }
 
-        fetch(url)
-        .then(function (response) {
-            response.json().then(async function (data) {
+        fetchData(url)
+            .then(function (data) {
                 items.push(...data.items)
                 --numberPageLeftFetching
                 if (numberPageLeftFetching > 0 && data.nextPageToken) {
@@ -148,31 +147,24 @@ function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
                     return resolve(items)
                 }
             })
-        })
     })
 }
 
 function fetchVideo(videoId) {
     const part = 'snippet,contentDetails'
     const fields = 'items(snippet(description,channelId),contentDetails(duration))'
-    const apiKey = getApiKey()
-    return fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}&key=${apiKey}`)
-        .then(function (response) {
-            return response.json().then(function (data) {
-                return data.items[0]
-            })
+    return fetchData(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}`)
+        .then(function (data) {
+            return data.items[0]
         })
 }
 
 function fetchChannel(channelId) {
     const part = 'snippet'
     const fields = 'items(snippet(title,thumbnails(default)))'
-    const apiKey = getApiKey()
-    return fetch(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}&key=${apiKey}`)
-        .then(function (response) {
-            return response.json().then(function (data) {
-                return data.items[0]
-            })
+    return fetchData(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}`)
+        .then(function (data) {
+            return data.items[0]
         })
 }
 
@@ -329,13 +321,59 @@ function parseDuration(duration) {
                 seconds += amount
                 break
             default:
-            // noop
+                // noop
         }
     })
     return seconds
 }
 
-function getApiKey() {
-    const randomApiKeyIndex = Math.floor(Math.random() * API_KEYS.length)
-    return API_KEYS[randomApiKeyIndex]
+function fetchData(url) {
+    const apiKeyIndex = validApiKeyIndex()
+    if (apiKeyIndex < 0) {
+        return Promise.reject()
+    }
+    const apiKey = API_KEYS[apiKeyIndex]
+    return new Promise(function(resolve, reject) {
+        fetch(url + `&key=${apiKey}`)
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (data.error && data.error.code === 403) {
+                        invalidateAipKey(apiKeyIndex, Date.now())
+                        //TODO retry with another key if possible
+                        reject()
+                    } else {
+                        resolve(data)
+                    }
+                })
+            })
+    })
+}
+
+function validApiKeyIndex() {
+    let indeces = []
+    for (let i = 0; i < API_KEYS.length; i++) {
+        indeces[i] = i
+    }
+    let counter = indeces.length
+    while (counter > 0) {
+        let index = Math.floor(Math.random() * counter)
+        const apiKeyIndex = indeces[index]
+        if (isValidApiKey(apiKeyIndex)) {
+            return apiKeyIndex
+        }
+        counter--
+        let temp = indeces[counter];
+        indeces[counter] = indeces[index];
+        indeces[index] = temp;
+    }
+}
+
+function isValidApiKey(index) {
+    // Daily quotas reset at midnight Pacific Time (PT). 
+    //TODO check that current day is different from invalidation time in Pacific Time.
+    return !INVALID_TIMES[index]
+}
+
+function invalidateAipKey(index, time) {
+    INVALID_TIMES[index] = time
 }
