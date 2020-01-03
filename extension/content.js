@@ -15,45 +15,49 @@ window.addEventListener('spfdone', navListener)
 main()
 
 function main() {
+    if (!getOrCreateBar()) {
+        return
+    }
     const videoId = getVideoId()
     if (videoId) {
-        Promise.all([fetchAllComments(videoId), fetchVideo(videoId)]).then(results => {
-            if (videoId !== getVideoId()) {
-                return
-            }
-
-            const commentItems = results[0]
-            const videoItem = results[1]
-            const videoDuration = parseDuration(videoItem.contentDetails.duration)
-
-            const commentsTcs = []
-            for (const item of commentItems) {
-                const cs = item.snippet.topLevelComment.snippet
-                for (const tsContext of getTimestampContexts(cs.textOriginal)) {
-                    commentsTcs.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, tsContext))
-                }
-            }
-            showTimeComments(commentsTcs, videoDuration)
-
-            const videoDescription = videoItem.snippet.description
-            const videoTsContexts = getTimestampContexts(videoDescription)
-            if (videoTsContexts.length > 0) {
-                fetchChannel(videoItem.snippet.channelId).then(channelItem => {
-                    if (videoId !== getVideoId()) {
-                        return
-                    }
-
-                    const channelAvatar = channelItem.snippet.thumbnails.default.url
-                    const channelTitle = channelItem.snippet.title
-                    const descriptionTcs = []
-                    for (const tsContext of videoTsContexts) {
-                        descriptionTcs.push(newTimeComment(channelAvatar, channelTitle, tsContext))
-                    }
-                    showTimeComments(descriptionTcs, videoDuration)
-                })
-            }
-        })
+        return
     }
+    Promise.all([fetchAllComments(videoId), fetchVideo(videoId)]).then(results => {
+        if (videoId !== getVideoId()) {
+            return
+        }
+
+        const commentItems = results[0]
+        const videoItem = results[1]
+        const videoDuration = parseDuration(videoItem.contentDetails.duration)
+
+        const commentsTcs = []
+        for (const item of commentItems) {
+            const cs = item.snippet.topLevelComment.snippet
+            for (const tsContext of getTimestampContexts(cs.textOriginal)) {
+                commentsTcs.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, tsContext))
+            }
+        }
+        showTimeComments(commentsTcs, videoDuration)
+
+        const videoDescription = videoItem.snippet.description
+        const videoTsContexts = getTimestampContexts(videoDescription)
+        if (videoTsContexts.length > 0) {
+            fetchChannel(videoItem.snippet.channelId).then(channelItem => {
+                if (videoId !== getVideoId()) {
+                    return
+                }
+
+                const channelAvatar = channelItem.snippet.thumbnails.default.url
+                const channelTitle = channelItem.snippet.title
+                const descriptionTcs = []
+                for (const tsContext of videoTsContexts) {
+                    descriptionTcs.push(newTimeComment(channelAvatar, channelTitle, tsContext))
+                }
+                showTimeComments(descriptionTcs, videoDuration)
+            })
+        }
+    })
 }
 
 function newTimeComment(authorAvatar, authorName, tsContext) {
@@ -183,7 +187,6 @@ function showTimeComments(timeComments, videoDuration) {
         const offset = tc.time / videoDuration * 100
         stamp.style.left = `calc(${offset}% - 2px)`
         bar.appendChild(stamp)
-
         stamp.addEventListener('mouseenter', function () {
             showPreview(tc)
         })
@@ -194,11 +197,14 @@ function showTimeComments(timeComments, videoDuration) {
 }
 
 function getOrCreateBar() {
+    const container = document.querySelector('.ytp-progress-list')
+    if (!container) {
+        return null
+    }
     let bar = document.querySelector('.__youtube-timestamps__bar')
     if (!bar) {
         bar = document.createElement('div')
         bar.classList.add('__youtube-timestamps__bar')
-        const container = document.querySelector('.ytp-progress-list')
         container.appendChild(bar)
     }
     return bar
