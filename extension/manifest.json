@@ -3,7 +3,7 @@
 
     "name": "YouTube Timestamps",
     "description": "Shows YouTube timestamps from comments.",
-    "version": "0.1.6",
+    "version": "0.1.7",
 
     "applications": {
             "gecko": {
