@@ -19,7 +19,7 @@ function main() {
         return
     }
     const videoId = getVideoId()
-    if (videoId) {
+    if (!videoId) {
         return
     }
     Promise.all([fetchAllComments(videoId), fetchVideo(videoId)]).then(results => {
