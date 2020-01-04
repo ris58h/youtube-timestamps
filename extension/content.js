@@ -16,9 +16,6 @@ window.addEventListener('spfdone', navListener)
 main()
 
 function main() {
-    if (!getOrCreateBar()) {
-        return
-    }
     const videoId = getVideoId()
     if (!videoId) {
         return
@@ -338,7 +335,7 @@ function fetchData(url) {
             .then(function (response) {
                 return response.json().then(function (data) {
                     if (data.error && data.error.code === 403) {
-                        invalidateAipKey(apiKeyIndex, Date.now())
+                        invalidateAipKey(apiKeyIndex)
                         //TODO retry with another key if possible
                         reject()
                     } else {
@@ -374,6 +371,6 @@ function isValidApiKey(index) {
     return !INVALID_TIMES[index]
 }
 
-function invalidateAipKey(index, time) {
-    INVALID_TIMES[index] = time
+function invalidateAipKey(index) {
+    INVALID_TIMES[index] = new Date()
 }
