@@ -1,14 +1,72 @@
 const INVALID_TIMES = []
+const NUMBER_OF_PAGES_TO_FETCH = 1
+const PAGE_SIZE = 100
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    //TODO If an extension's background page simply fetches and relays any URL of a content script's choice (effectively acting as an open proxy), then similar security problems occur.  That is, a compromised renderer process can hijack the content script and ask the background page to fetch and relay sensitive URLs of the attacker's choosing.  Instead, background pages should only fetch data from URLs the extension author intends, which is ideally a small set of URLs which does not put the user's sensitive data at risk.
-    if (request.type == 'fetchData') {
-        fetchData(request.url).then(function (data) {
-            sendResponse(data)
-        })
+    if (request.type == 'fetchComments') {
+        fetchComments(request.videoId).then(sendResponse)
+        return true
+    }
+    if (request.type == 'fetchVideo') {
+        fetchVideo(request.videoId).then(sendResponse)
+        return true
+    }
+    if (request.type == 'fetchChannel') {
+        fetchChannel(request.channelId).then(sendResponse)
         return true
     }
 })
+
+function fetchComments(videoId) {
+    return new Promise(async (resolve) => {
+        let items = []
+        await fetchCommentsIteration(videoId, NUMBER_OF_PAGES_TO_FETCH, items).then(resolve)
+    })
+}
+
+function fetchCommentsIteration(videoId, numberPageLeftFetching, items, pageToken) {
+    return new Promise((resolve) => {
+        const part = 'snippet'
+        const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
+        const order = 'relevance'
+        const maxResults = PAGE_SIZE
+        
+        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}`
+
+        if (pageToken) {
+            url = url + `&pageToken=${pageToken}`
+        }
+
+        fetchData(url)
+            .then(function (data) {
+                items.push(...data.items)
+                --numberPageLeftFetching
+                if (numberPageLeftFetching > 0 && data.nextPageToken) {
+                    return resolve(fetchCommentsIteration(videoId, numberPageLeftFetching, items, data.nextPageToken))
+                } else {
+                    return resolve(items)
+                }
+            })
+    })
+}
+
+function fetchVideo(videoId) {
+    const part = 'snippet,contentDetails'
+    const fields = 'items(snippet(description,channelId),contentDetails(duration))'
+    return fetchData(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}`)
+        .then(function (data) {
+            return data.items[0]
+        })
+}
+
+function fetchChannel(channelId) {
+    const part = 'snippet'
+    const fields = 'items(snippet(title,thumbnails(default)))'
+    return fetchData(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}`)
+        .then(function (data) {
+            return data.items[0]
+        })
+}
 
 function fetchData(url) {
     const apiKeyIndex = validApiKeyIndex()

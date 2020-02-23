@@ -1,5 +1,3 @@
-const NUMBER_OF_PAGES_TO_FETCH = 1
-const PAGE_SIZE = 100
 const MAX_TEXT_LENGTH = 128
 
 const navListener = function () {
@@ -19,7 +17,7 @@ function main() {
     if (!videoId) {
         return
     }
-    Promise.all([fetchAllComments(videoId), fetchVideo(videoId)]).then(results => {
+    Promise.all([fetchComments(videoId), fetchVideo(videoId)]).then(results => {
         if (videoId !== getVideoId()) {
             return
         }
@@ -111,57 +109,22 @@ function getVideoId() {
     }
 }
 
-function fetchAllComments(videoId) {
-    return new Promise(async (resolve) => {
-        let items = []
-        await fetchComments(videoId, NUMBER_OF_PAGES_TO_FETCH, items).then((res) => {
-            return resolve(res)
-        })
-    })
-}
-
-function fetchComments(videoId, numberPageLeftFetching, items, pageToken) {
-    return new Promise((resolve) => {
-        const part = 'snippet'
-        const fields = 'items(snippet(topLevelComment(snippet))),nextPageToken'
-        const order = 'relevance'
-        const maxResults = PAGE_SIZE
-        
-        let url = `https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}`
-
-        if (pageToken) {
-            url = url + `&pageToken=${pageToken}`
-        }
-
-        fetchData(url)
-            .then(function (data) {
-                items.push(...data.items)
-                --numberPageLeftFetching
-                if (numberPageLeftFetching > 0 && data.nextPageToken) {
-                    return resolve(fetchComments(videoId, numberPageLeftFetching, items, data.nextPageToken))
-                } else {
-                    return resolve(items)
-                }
-            })
+function fetchComments(videoId) {
+    return new Promise(function(resolve, reject) {
+        chrome.runtime.sendMessage({type: 'fetchComments', videoId}, resolve)
     })
 }
 
 function fetchVideo(videoId) {
-    const part = 'snippet,contentDetails'
-    const fields = 'items(snippet(description,channelId),contentDetails(duration))'
-    return fetchData(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}`)
-        .then(function (data) {
-            return data.items[0]
-        })
+    return new Promise(function(resolve, reject) {
+        chrome.runtime.sendMessage({type: 'fetchVideo', videoId}, resolve)
+    })
 }
 
 function fetchChannel(channelId) {
-    const part = 'snippet'
-    const fields = 'items(snippet(title,thumbnails(default)))'
-    return fetchData(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}`)
-        .then(function (data) {
-            return data.items[0]
-        })
+    return new Promise(function(resolve, reject) {
+        chrome.runtime.sendMessage({type: 'fetchChannel', channelId}, resolve)
+    })
 }
 
 function showTimeComments(timeComments, videoDuration) {
@@ -321,12 +284,4 @@ function parseDuration(duration) {
         }
     })
     return seconds
-}
-
-function fetchData(url) {
-    return new Promise(function(resolve, reject) {
-        chrome.runtime.sendMessage({type: 'fetchData', url}, function (data) {
-            resolve(data)
-        })
-    })
 }
