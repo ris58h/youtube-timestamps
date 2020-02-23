@@ -1,7 +1,6 @@
 const NUMBER_OF_PAGES_TO_FETCH = 1
 const PAGE_SIZE = 100
 const MAX_TEXT_LENGTH = 128
-const INVALID_TIMES = []
 
 const navListener = function () {
     removeBar()
@@ -325,52 +324,9 @@ function parseDuration(duration) {
 }
 
 function fetchData(url) {
-    const apiKeyIndex = validApiKeyIndex()
-    if (apiKeyIndex < 0) {
-        return Promise.reject()
-    }
-    const apiKey = API_KEYS[apiKeyIndex]
     return new Promise(function(resolve, reject) {
-        fetch(url + `&key=${apiKey}`)
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    if (data.error && data.error.code === 403) {
-                        invalidateAipKey(apiKeyIndex)
-                        //TODO retry with another key if possible
-                        reject()
-                    } else {
-                        resolve(data)
-                    }
-                })
-            })
+        chrome.runtime.sendMessage({type: 'fetchData', url}, function (data) {
+            resolve(data)
+        })
     })
-}
-
-function validApiKeyIndex() {
-    let indeces = []
-    for (let i = 0; i < API_KEYS.length; i++) {
-        indeces[i] = i
-    }
-    let counter = indeces.length
-    while (counter > 0) {
-        let index = Math.floor(Math.random() * counter)
-        const apiKeyIndex = indeces[index]
-        if (isValidApiKey(apiKeyIndex)) {
-            return apiKeyIndex
-        }
-        counter--
-        let temp = indeces[counter];
-        indeces[counter] = indeces[index];
-        indeces[index] = temp;
-    }
-}
-
-function isValidApiKey(index) {
-    // Daily quotas reset at midnight Pacific Time (PT). 
-    //TODO check that current day is different from invalidation time in Pacific Time.
-    return !INVALID_TIMES[index]
-}
-
-function invalidateAipKey(index) {
-    INVALID_TIMES[index] = new Date()
 }
