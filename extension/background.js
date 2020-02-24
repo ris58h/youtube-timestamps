@@ -70,7 +70,7 @@ function fetchChannel(channelId) {
 
 function fetchData(url) {
     const apiKeyIndex = validApiKeyIndex()
-    if (apiKeyIndex < 0) {
+    if (apiKeyIndex == null || apiKeyIndex < 0) {
         return Promise.reject()
     }
     const apiKey = API_KEYS[apiKeyIndex]
@@ -95,7 +95,7 @@ function validApiKeyIndex() {
     for (let i = 0; i < API_KEYS.length; i++) {
         indeces[i] = i
     }
-    let counter = indeces.length
+    let counter = API_KEYS.length
     while (counter > 0) {
         let index = Math.floor(Math.random() * counter)
         const apiKeyIndex = indeces[index]
@@ -107,6 +107,9 @@ function validApiKeyIndex() {
         indeces[counter] = indeces[index]
         indeces[index] = temp
     }
+    // So anyway, I started blasting
+    //TODO return null and make right API key validation
+    return Math.floor(Math.random() * API_KEYS.length)
 }
 
 function isValidApiKey(index) {
