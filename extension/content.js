@@ -129,6 +129,9 @@ function fetchChannel(channelId) {
 
 function showTimeComments(timeComments, videoDuration) {
     const bar = getOrCreateBar()
+    if (!bar) {
+        return
+    }
     for (const tc of timeComments) {
         if (tc.time > videoDuration) {
             continue
@@ -148,12 +151,15 @@ function showTimeComments(timeComments, videoDuration) {
 }
 
 function getOrCreateBar() {
-    const container = document.querySelector('.ytp-progress-list')
-    if (!container) {
-        return null
-    }
     let bar = document.querySelector('.__youtube-timestamps__bar')
     if (!bar) {
+        let container = document.querySelector('.ytp-chapters-container')
+        if (!container) {
+            container = document.querySelector('.ytp-progress-list')
+        }
+        if (!container) {
+            return null
+        }
         bar = document.createElement('div')
         bar.classList.add('__youtube-timestamps__bar')
         container.appendChild(bar)
@@ -208,6 +214,7 @@ function showPreview(timeComment) {
     const bgWidth = parent.querySelector('.ytp-tooltip-bg').style.width
     const previewWidth = bgWidth.endsWith('px') ? parseFloat(bgWidth) : 160
     const halfPreviewWidth = previewWidth / 2
+    // const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
     const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
     const pivot = preview.parentElement.getBoundingClientRect().left
     const minPivot = playerRect.left + halfPreviewWidth
