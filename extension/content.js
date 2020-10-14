@@ -153,7 +153,7 @@ function showTimeComments(timeComments, videoDuration) {
 function getOrCreateBar() {
     let bar = document.querySelector('.__youtube-timestamps__bar')
     if (!bar) {
-        let container = document.querySelector('.ytp-chapters-container')
+        let container = document.querySelector('.ytp-timed-markers-container')
         if (!container) {
             container = document.querySelector('.ytp-progress-list')
         }
