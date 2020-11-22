@@ -31,6 +31,11 @@
     ],
 
     "background": {
-        "scripts": ["secret.js", "background.js"]
+        "scripts": [
+            "secret.js",
+            "background/auth.js",
+            "background/youtube.js",
+            "background/main.js"
+        ]
     }
 }

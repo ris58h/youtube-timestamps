@@ -110,19 +110,19 @@ function getVideoId() {
 }
 
 function fetchComments(videoId) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({type: 'fetchComments', videoId}, resolve)
     })
 }
 
 function fetchVideo(videoId) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({type: 'fetchVideo', videoId}, resolve)
     })
 }
 
 function fetchChannel(channelId) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({type: 'fetchChannel', channelId}, resolve)
     })
 }
@@ -273,7 +273,7 @@ function parseParams(href) {
 function parseDuration(duration) {
     const matches = duration.match(/[0-9]+[HMS]/g)
     let seconds = 0
-    matches.forEach(function (part) {
+    matches.forEach(part => {
         const unit = part.charAt(part.length - 1)
         const amount = parseInt(part.slice(0, -1))
         switch (unit) {
