@@ -29,7 +29,7 @@
 .__youtube-timestamps__preview {
     position: absolute;
     background-color: white;
-    bottom: 8px;
+    bottom: 10px;
     box-sizing: border-box;
     padding: 8px;
 }
@@ -48,17 +48,35 @@
     margin-left: 8px;
     font-size: 1.3rem;
     font-weight: 500;
-    color: rgb(17, 17, 17);
+    color: #030303;
 }
 
 .__youtube-timestamps__preview__text {
     margin-top: 8px;
     font-size: 1.4rem;
     font-weight: 400;
-    color: rgb(17, 17, 17);
+    color: #030303;
     white-space: pre-line;
 }
 
 .__youtube-timestamps__preview__text-stamp {
-    color: rgb(6, 95, 212);
+    color: #065fd4;
+}
+
+@media (prefers-color-scheme: dark) {
+    .__youtube-timestamps__preview {
+        background-color: #181818;
+    }
+
+    .__youtube-timestamps__preview__name {
+        color: white;
+    }
+
+    .__youtube-timestamps__preview__text {
+        color: white;
+    }
+
+    .__youtube-timestamps__preview__text-stamp {
+        color: #3ea6ff;
+    }
 }

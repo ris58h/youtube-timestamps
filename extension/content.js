@@ -1,4 +1,5 @@
 const MAX_TEXT_LENGTH = 128
+const PREVIEW_BORDER_SIZE = 2
 
 const navListener = function () {
     removeBar()
@@ -227,8 +228,9 @@ function showPreview(timeComment) {
     } else {
         previewLeft = -halfPreviewWidth
     }
-    preview.style.width = previewWidth + 'px'
-    preview.style.left = previewLeft + 'px'
+
+    preview.style.width = (previewWidth + 2*PREVIEW_BORDER_SIZE) + 'px'
+    preview.style.left = (previewLeft - PREVIEW_BORDER_SIZE) + 'px'
 }
 
 function highlightTextFragment(text, fragment) {
