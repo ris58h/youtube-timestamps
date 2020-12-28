@@ -23,16 +23,24 @@ function fetchChannel(channelId) {
 }
 
 function fetchData(url) {
-    return getApiKey()
-        .then(apiKey => fetch(url + `&key=${apiKey}`))
+    return getAuthInfo()
+        .then(info => {
+            if (info.type == 'key') {
+                return fetch(url + `&key=${info.data}`)
+            } else if (info.type == 'token') {
+                return fetch(url, {
+                    headers: {
+                        'Authorization': 'Bearer ' + info.data
+                    }
+                })
+            } else {
+                throw new Error("Unknown auth type: " + info.type)
+            }
+        })
         .then(response => response.json())
         .then(data => {
             if (data.error) {
-                if (data.error.code === 403) {
-                    invalidateApiKeyIndex(apiKeyIndex)
-                    //TODO retry with another key if possible
-                }
-                return Promise.reject()
+                throw new Error(data.error.message)
             } else {
                 return data
             }
