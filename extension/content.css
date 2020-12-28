@@ -28,6 +28,7 @@
 
 .__youtube-timestamps__preview {
     position: absolute;
+    overflow: hidden;
     background-color: white;
     bottom: 10px;
     box-sizing: border-box;
