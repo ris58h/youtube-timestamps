@@ -46,17 +46,24 @@
 }
 
 .__youtube-timestamps__preview__name {
-    margin-left: 8px;
-    font-size: 1.3rem;
-    font-weight: 500;
+    /* From YT */
     color: #030303;
+    font-size: 13px;/* was 1.3rem */
+    font-weight: 500;
+    line-height: 18px;/* was 1.8rem */
+
+    margin-left: 8px;
 }
 
 .__youtube-timestamps__preview__text {
-    margin-top: 8px;
-    font-size: 1.4rem;
-    font-weight: 400;
+    /* From YT */
     color: #030303;
+    font-size: 14px;/* was 1.4rem */
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 20px;/* was 2rem */
+
+    margin-top: 8px;
     white-space: pre-line;
 }
 
