@@ -38,6 +38,8 @@ function main() {
 
         const videoDescription = videoItem.snippet.description
         const videoTsContexts = getTimestampContexts(videoDescription)
+            // Just a quick hack to filter out chapter timestamps.
+            .filter(tsContext => !tsContext.text.startsWith(tsContext.timestamp))
         if (videoTsContexts.length > 0) {
             fetchChannel(videoItem.snippet.channelId).then(channelItem => {
                 if (videoId !== getVideoId()) {
