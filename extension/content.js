@@ -35,26 +35,6 @@ function main() {
             }
         }
         showTimeComments(commentsTcs, videoDuration)
-
-        const videoDescription = videoItem.snippet.description
-        const videoTsContexts = getTimestampContexts(videoDescription)
-            // Just a quick hack to filter out chapter timestamps.
-            .filter(tsContext => !tsContext.text.startsWith(tsContext.timestamp))
-        if (videoTsContexts.length > 0) {
-            fetchChannel(videoItem.snippet.channelId).then(channelItem => {
-                if (videoId !== getVideoId()) {
-                    return
-                }
-
-                const channelAvatar = channelItem.snippet.thumbnails.default.url
-                const channelTitle = channelItem.snippet.title
-                const descriptionTcs = []
-                for (const tsContext of videoTsContexts) {
-                    descriptionTcs.push(newTimeComment(channelAvatar, channelTitle, tsContext))
-                }
-                showTimeComments(descriptionTcs, videoDuration)
-            })
-        }
     })
 }
 
@@ -121,12 +101,6 @@ function fetchComments(videoId) {
 function fetchVideo(videoId) {
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({type: 'fetchVideo', videoId}, resolve)
-    })
-}
-
-function fetchChannel(channelId) {
-    return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({type: 'fetchChannel', channelId}, resolve)
     })
 }
 

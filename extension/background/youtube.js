@@ -9,16 +9,9 @@ function fetchComments(videoId) {
 }
 
 function fetchVideo(videoId) {
-    const part = 'snippet,contentDetails'
-    const fields = 'items(snippet(description,channelId),contentDetails(duration))'
+    const part = 'contentDetails'
+    const fields = 'items(contentDetails(duration))'
     return fetchData(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=${part}&fields=${fields}`)
-        .then(data => data.items[0])
-}
-
-function fetchChannel(channelId) {
-    const part = 'snippet'
-    const fields = 'items(snippet(title,thumbnails(default)))'
-    return fetchData(`https://www.googleapis.com/youtube/v3/channels?id=${channelId}&part=${part}&fields=${fields}`)
         .then(data => data.items[0])
 }
 

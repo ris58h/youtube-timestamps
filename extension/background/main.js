@@ -10,8 +10,6 @@ function createRequest(request) {
         return fetchComments(request.videoId)
     } else if (request.type == 'fetchVideo') {
         return fetchVideo(request.videoId)
-    } else if (request.type == 'fetchChannel') {
-        return fetchChannel(request.channelId)
     } else {
         return Promise.reject(new Error("Unknown request type: " + request.type))
     }
