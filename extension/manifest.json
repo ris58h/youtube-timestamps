@@ -32,9 +32,8 @@
 
     "background": {
         "scripts": [
-            "secret.js",
-            "background/auth.js",
-            "background/youtube.js",
+            "background/secret.js",
+            "background/googleapis.js",
             "background/main.js"
         ]
     }

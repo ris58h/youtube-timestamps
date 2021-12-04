@@ -18,20 +18,18 @@ function main() {
     if (!videoId) {
         return
     }
-    Promise.all([fetchComments(videoId), fetchVideo(videoId)]).then(results => {
+    fetchData(videoId).then(data => {
         if (videoId !== getVideoId()) {
             return
         }
 
-        const commentItems = results[0]
-        const videoItem = results[1]
-        const videoDuration = parseDuration(videoItem.contentDetails.duration)
+        const comments = data.comments
+        const videoDuration = data.video.duration
 
         const commentsTcs = []
-        for (const item of commentItems) {
-            const cs = item.snippet.topLevelComment.snippet
-            for (const tsContext of getTimestampContexts(cs.textOriginal)) {
-                commentsTcs.push(newTimeComment(cs.authorProfileImageUrl, cs.authorDisplayName, tsContext))
+        for (const comment of comments) {
+            for (const tsContext of getTimestampContexts(comment.text)) {
+                commentsTcs.push(newTimeComment(comment.authorAvatar, comment.authorName, tsContext))
             }
         }
         showTimeComments(commentsTcs, videoDuration)
@@ -92,15 +90,9 @@ function getVideoId() {
     }
 }
 
-function fetchComments(videoId) {
+function fetchData(videoId) {
     return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({type: 'fetchComments', videoId}, resolve)
-    })
-}
-
-function fetchVideo(videoId) {
-    return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({type: 'fetchVideo', videoId}, resolve)
+        chrome.runtime.sendMessage({type: 'fetchData', videoId}, resolve)
     })
 }
 
@@ -246,27 +238,4 @@ function parseParams(href) {
         }
     }
     return params
-}
-
-function parseDuration(duration) {
-    const matches = duration.match(/[0-9]+[HMS]/g)
-    let seconds = 0
-    matches.forEach(part => {
-        const unit = part.charAt(part.length - 1)
-        const amount = parseInt(part.slice(0, -1))
-        switch (unit) {
-            case 'H':
-                seconds += amount * 60 * 60
-                break
-            case 'M':
-                seconds += amount * 60
-                break
-            case 'S':
-                seconds += amount
-                break
-            default:
-                // noop
-        }
-    })
-    return seconds
 }
