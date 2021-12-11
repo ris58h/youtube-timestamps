@@ -1,5 +1,5 @@
 .vscode
 node_modules
 dist
-extension/background/secret.js
+extension/background/googleapis-keys.js
 .DS_Store

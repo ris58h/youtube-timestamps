@@ -19,8 +19,8 @@ googleapis.youtube = {};
     }
 
     function getAuthInfo() {
-        const apiKeyIndex = Math.floor(Math.random() * API_KEYS.length)
-        const apiKey = API_KEYS[apiKeyIndex]
+        const apiKeyIndex = Math.floor(Math.random() * googleapis.API_KEYS.length)
+        const apiKey = googleapis.API_KEYS[apiKeyIndex]
         return Promise.resolve({type: 'key', data: apiKey})
     }
     

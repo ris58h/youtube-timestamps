@@ -12,7 +12,8 @@
     },
 
     "permissions": [
-        "https://www.googleapis.com/youtube/v3/*"
+        "https://www.googleapis.com/youtube/v3/*",
+        "https://www.youtube.com/*"
     ],
 
     "icons": {
@@ -32,8 +33,9 @@
 
     "background": {
         "scripts": [
-            "background/secret.js",
+            "background/googleapis-keys.js",
             "background/googleapis.js",
+            "background/youtubei.js",
             "background/main.js"
         ]
     }

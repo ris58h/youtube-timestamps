@@ -1,7 +1,9 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     createRequest(request)
         .then(sendResponse)
-        .catch(e => console.error(e))
+        .catch(e => {
+            console.error(e)
+        })
     return true
 })
 
@@ -13,37 +15,38 @@ function createRequest(request) {
     }
 }
 
-/**
- * Fetches the data about video.
- * @param {string} videoId 
- * @returns {Promise} {
-        video: {
-            duration
-        },
-        comments: [{
-            authorName,
-            authorAvatar,
-            text
-        }]
-    }
- */
 function fetchData(videoId) {
-    return Promise.all([googleapis.youtube.fetchComments(videoId), googleapis.youtube.fetchVideo(videoId)]).then(results => {
-        const commentItems = results[0]
-        const videoItem = results[1]
-        const videoDuration = parseDuration(videoItem.contentDetails.duration)
+    return Promise.all([fetchVideo(videoId), fetchComments(videoId)]).then(results => {
+        return {
+            video: results[0],
+            comments: results[1]
+        }
+    })
+}
 
+function fetchVideo(videoId) {
+    return youtubei.fetchVideo(videoId)
+        .then(data => {
+            const videoDurationString = data[2].playerResponse.videoDetails.lengthSeconds
+            const videoDuration = parseInt(videoDurationString)
+            return newVideo(videoDuration)
+        })
+        .catch(() => {
+            return googleapis.youtube.fetchVideo(videoId).then(videoItem => {
+                const videoDuration = parseDuration(videoItem.contentDetails.duration)
+                return newVideo(videoDuration)
+            })
+        })
+}
+
+function fetchComments(videoId) {
+    return googleapis.youtube.fetchComments(videoId).then(commentItems => {
         const comments = []
         for (const item of commentItems) {
             const cs = item.snippet.topLevelComment.snippet
             comments.push(newComment(cs.authorDisplayName, cs.authorProfileImageUrl, cs.textOriginal))
         }
-        return {
-            video: {
-                duration: videoDuration
-            },
-            comments
-        }
+        return comments
     })
 }
 
@@ -68,6 +71,12 @@ function parseDuration(duration) {
         }
     })
     return seconds
+}
+
+function newVideo(duration) {
+    return {
+        duration
+    }
 }
 
 function newComment(authorName, authorAvatar, text) {
