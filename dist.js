@@ -1,12 +1,13 @@
-const fs = require('fs-extra')
-var archiver = require('archiver')
+import fsExtraPkg from 'fs-extra'
+const { remove, ensureDir, readJson, createWriteStream } = fsExtraPkg
+import archiver from 'archiver'
 
 {(async function() {
-    await fs.remove("./dist")
-    await fs.ensureDir("./dist")
+    await remove("./dist")
+    await ensureDir("./dist")
 
-    const version = (await fs.readJson("./extension/manifest.json")).version
-    const output = fs.createWriteStream(`./dist/youtube-timestamps-${version}.zip`)
+    const version = (await readJson("./extension/manifest.json")).version
+    const output = createWriteStream(`./dist/youtube-timestamps-${version}.zip`)
     const archive = archiver("zip")
     archive.pipe(output)
     archive.glob("**/*", { cwd: "./extension" })

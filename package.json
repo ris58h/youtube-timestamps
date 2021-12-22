@@ -1,15 +1,12 @@
 {
     "name": "youtube-timestamps",
+    "type": "module",
     "scripts": {
-        "test": "mocha --timeout 15000",
         "dist": "node dist.js"
     },
     "devDependencies": {
         "archiver": "^3.0.0",
-        "chai": "^4.2.0",
-        "eslint": "^5.16.0",
-        "fs-extra": "^6.0.1",
-        "mocha": "^5.2.0",
-        "puppeteer": "^1.17.0"
+        "eslint": "^8.5.0",
+        "fs-extra": "^6.0.1"
     }
 }

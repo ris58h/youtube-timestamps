@@ -33,13 +33,11 @@
         }
     ],
 
+    "web_accessible_resources": [
+        "background/youtubei.js"
+    ],
+
     "background": {
-        "scripts": [
-            "background/googleapis-keys.js",
-            "background/googleapis.js",
-            "background/youtubei.js",
-            "background/timestamp.js",
-            "background/main.js"
-        ]
+        "page": "background/main.html"
     }
 }

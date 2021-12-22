@@ -1,3 +1,7 @@
+import * as youtubei from './youtubei.js'
+import * as googleapis from './googleapis.js'
+import { findTimestamps, parseTimestamp } from './timestamp.js'
+
 const MAX_TEXT_LENGTH = 128
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -59,7 +63,7 @@ function fetchCommentsYoutubei(videoId) {
 }
 
 function fetchCommentsGoogleapis(videoId) {
-    return googleapis.youtube.fetchComments(videoId)
+    return googleapis.fetchComments(videoId)
         .then(commentItems => {
             const comments = []
             for (const item of commentItems) {
