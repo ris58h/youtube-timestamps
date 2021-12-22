@@ -1,4 +1,3 @@
-const MAX_TEXT_LENGTH = 128
 const PREVIEW_BORDER_SIZE = 2
 
 const navListener = function () {
@@ -18,66 +17,13 @@ function main() {
     if (!videoId) {
         return
     }
-    fetchData(videoId).then(data => {
-        if (videoId !== getVideoId()) {
-            return
-        }
-
-        const comments = data.comments
-        const videoDuration = data.video.duration
-
-        const commentsTcs = []
-        for (const comment of comments) {
-            for (const tsContext of getTimestampContexts(comment.text)) {
-                commentsTcs.push(newTimeComment(comment.authorAvatar, comment.authorName, tsContext))
+    fetchTimeComments(videoId)
+        .then(timeComments => {
+            if (videoId !== getVideoId()) {
+                return
             }
-        }
-        showTimeComments(commentsTcs, videoDuration)
-    })
-}
-
-function newTimeComment(authorAvatar, authorName, tsContext) {
-    return {
-        authorAvatar,
-        authorName,
-        timestamp: tsContext.timestamp,
-        time: tsContext.time,
-        text: tsContext.text
-    }
-}
-
-function getTimestampContexts(text) {
-    const result = []
-    const lines = text.split('\n')
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i]
-        if (line) {
-            const positions = findTimestamps(line)
-            for (const position of positions) {
-                const timestamp = line.substring(position.from, position.to)
-                const time = parseTimestamp(timestamp)
-                if (time === null) {
-                    continue
-                }
-                let contextText
-                if (text.length > MAX_TEXT_LENGTH) {
-                    if (timestamp === line && i + 1 < lines.length && lines[i + 1]) {
-                        contextText = line + '\n' + lines[i + 1]
-                    } else {
-                        contextText = line
-                    }
-                } else {
-                    contextText = text
-                }
-                result.push({
-                    text: contextText,
-                    time,
-                    timestamp
-                })
-            }
-        }
-    }
-    return result
+            showTimeComments(timeComments)
+        })
 }
 
 function getVideoId() {
@@ -90,17 +36,18 @@ function getVideoId() {
     }
 }
 
-function fetchData(videoId) {
+function fetchTimeComments(videoId) {
     return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({type: 'fetchData', videoId}, resolve)
+        chrome.runtime.sendMessage({type: 'fetchTimeComments', videoId}, resolve)
     })
 }
 
-function showTimeComments(timeComments, videoDuration) {
+function showTimeComments(timeComments) {
     const bar = getOrCreateBar()
     if (!bar) {
         return
     }
+    const videoDuration = document.querySelector('video').duration
     for (const tc of timeComments) {
         if (tc.time > videoDuration) {
             continue

@@ -28,7 +28,7 @@
         {
             "matches": ["https://www.youtube.com/*"],
             "all_frames": true,
-            "js": ["timestamp.js", "content.js"],
+            "js": ["content.js"],
             "css": ["content.css"]
         }
     ],
@@ -38,6 +38,7 @@
             "background/googleapis-keys.js",
             "background/googleapis.js",
             "background/youtubei.js",
+            "background/timestamp.js",
             "background/main.js"
         ]
     }

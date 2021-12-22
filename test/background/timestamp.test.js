@@ -1,4 +1,4 @@
-const ts = require('../extension/timestamp')
+const ts = require('../../extension/background/timestamp')
 const assert = require('assert').strict
 
 describe('timestamp', () => {

@@ -1,62 +1,46 @@
+const MAX_TEXT_LENGTH = 128
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    createRequest(request)
-        .then(sendResponse)
-        .catch(e => {
-            console.error(e)
-        })
-    return true
+    if (request.type == 'fetchTimeComments') {
+        fetchTimeComments(request.videoId)
+            .then(sendResponse)
+            .catch(e => {
+                console.error(e)
+            })
+        return true
+    }
 })
 
-function createRequest(request) {
-    if (request.type == 'fetchData') {
-        return fetchData(request.videoId)
-    } else {
-        return Promise.reject(new Error("Unknown request type: " + request.type))
-    }
+function fetchTimeComments(videoId) {
+    return fetchComments(videoId)
+        .then(comments => {
+            const timeComments = []
+            for (const comment of comments) {
+                for (const tsContext of getTimestampContexts(comment.text)) {
+                    timeComments.push(newTimeComment(comment.authorAvatar, comment.authorName, tsContext))
+                }
+            }
+            return timeComments
+        })
 }
 
-function fetchData(videoId) {
-    return fetchDataYoutubei(videoId)
-        .then(data => {
-            if (data.comments) {
-                return data
-            }
-            return fetchCommentsGoogleapis(videoId).then(comments => {
-                return {
-                    video: data.video,
-                    comments
-                }
-            })
-        })
+function fetchComments(videoId) {
+    return fetchCommentsYoutubei(videoId)
         .catch(e => {
             console.error(e)
-            return fetchDataGoogleapis(videoId)
+            return fetchCommentsGoogleapis(videoId)
         })
 }
 
-function fetchDataYoutubei(videoId) {
-    return youtubei.fetchVideo(videoId).then(videoResponse => {
-        const videoDurationString = videoResponse[2].playerResponse.videoDetails.lengthSeconds
-        const videoDuration = parseInt(videoDurationString)
-        const video = newVideo(videoDuration)
-
-        let commentsContinuation
-        try {
-            commentsContinuation = videoResponse[3].response.contents.twoColumnWatchNextResults.results.results
-            .contents[2].itemSectionRenderer
-            .contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
-        } catch (e) {
-            console.error(e)
-            return {
-                video
-            }
-        }
-
-        //TODO: fetch 100 comments (we need to fetch multiple pages).
-        return youtubei.fetchNext(commentsContinuation)
-            .then(commentsResponse => {
+function fetchCommentsYoutubei(videoId) {
+    return youtubei.fetchVideo(videoId)
+        .then(videoResponse => {
+            const commentsContinuation = videoResponse[3].response.contents.twoColumnWatchNextResults.results.results
+                .contents[2].itemSectionRenderer
+                .contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+            //TODO: fetch 100 comments (we need to fetch multiple pages).
+            return youtubei.fetchNext(commentsContinuation).then(commentsResponse => {
                 const items = commentsResponse.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
-
                 const comments = []
                 for (const item of items) {
                     if (item.commentThreadRenderer) {
@@ -69,75 +53,21 @@ function fetchDataYoutubei(videoId) {
                         comments.push(newComment(authorName, authorAvatar, text))
                     }
                 }
-
-                return {
-                    video,
-                    comments
-                }
+                return comments
             })
-            .catch(e => {
-                console.error(e)
-                return {
-                    video
-                }
-            })
-    })
-}
-
-function fetchDataGoogleapis(videoId) {
-    return Promise.all([fetchVideoGoogleapis(videoId), fetchCommentsGoogleapis(videoId)]).then(results => {
-        return {
-            video: results[0],
-            comments: results[1]
-        }
-    })
-}
-
-function fetchVideoGoogleapis(videoId) {
-    return googleapis.youtube.fetchVideo(videoId).then(videoItem => {
-        const videoDuration = parseDuration(videoItem.contentDetails.duration)
-        return newVideo(videoDuration)
-    })
+        })
 }
 
 function fetchCommentsGoogleapis(videoId) {
-    return googleapis.youtube.fetchComments(videoId).then(commentItems => {
-        const comments = []
-        for (const item of commentItems) {
-            const cs = item.snippet.topLevelComment.snippet
-            comments.push(newComment(cs.authorDisplayName, cs.authorProfileImageUrl, cs.textOriginal))
-        }
-        return comments
-    })
-}
-
-function parseDuration(duration) {
-    const matches = duration.match(/[0-9]+[HMS]/g)
-    let seconds = 0
-    matches.forEach(part => {
-        const unit = part.charAt(part.length - 1)
-        const amount = parseInt(part.slice(0, -1))
-        switch (unit) {
-            case 'H':
-                seconds += amount * 60 * 60
-                break
-            case 'M':
-                seconds += amount * 60
-                break
-            case 'S':
-                seconds += amount
-                break
-            default:
-                // noop
-        }
-    })
-    return seconds
-}
-
-function newVideo(duration) {
-    return {
-        duration
-    }
+    return googleapis.youtube.fetchComments(videoId)
+        .then(commentItems => {
+            const comments = []
+            for (const item of commentItems) {
+                const cs = item.snippet.topLevelComment.snippet
+                comments.push(newComment(cs.authorDisplayName, cs.authorProfileImageUrl, cs.textOriginal))
+            }
+            return comments
+        })
 }
 
 function newComment(authorName, authorAvatar, text) {
@@ -146,4 +76,48 @@ function newComment(authorName, authorAvatar, text) {
         authorAvatar,
         text
     }
+}
+
+function newTimeComment(authorAvatar, authorName, tsContext) {
+    return {
+        authorAvatar,
+        authorName,
+        timestamp: tsContext.timestamp,
+        time: tsContext.time,
+        text: tsContext.text
+    }
+}
+
+function getTimestampContexts(text) {
+    const result = []
+    const lines = text.split('\n')
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (line) {
+            const positions = findTimestamps(line)
+            for (const position of positions) {
+                const timestamp = line.substring(position.from, position.to)
+                const time = parseTimestamp(timestamp)
+                if (time === null) {
+                    continue
+                }
+                let contextText
+                if (text.length > MAX_TEXT_LENGTH) {
+                    if (timestamp === line && i + 1 < lines.length && lines[i + 1]) {
+                        contextText = line + '\n' + lines[i + 1]
+                    } else {
+                        contextText = line
+                    }
+                } else {
+                    contextText = text
+                }
+                result.push({
+                    text: contextText,
+                    time,
+                    timestamp
+                })
+            }
+        }
+    }
+    return result
 }
