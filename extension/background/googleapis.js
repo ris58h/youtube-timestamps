@@ -1,12 +1,12 @@
 import { API_KEYS } from "./googleapis-keys.js"
 
-export function fetchComments(videoId) {
+export async function fetchComments(videoId) {
     const part = 'snippet'
     const fields = 'items(snippet(topLevelComment(snippet)))'
     const order = 'relevance'
     const maxResults = 100
-    return fetchData(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}`)
-        .then(data => data.items)
+    const data = await fetchData(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}`)
+    return data.items
 }
 
 function getAuthInfo() {
@@ -15,7 +15,7 @@ function getAuthInfo() {
     return Promise.resolve({type: 'key', data: apiKey})
 }
 
-function fetchData(url) {
+async function fetchData(url) {
     return getAuthInfo()
         .then(info => {
             if (info.type == 'key') {

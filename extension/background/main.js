@@ -15,63 +15,56 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 })
 
-function fetchTimeComments(videoId) {
-    return fetchComments(videoId)
-        .then(comments => {
-            const timeComments = []
-            for (const comment of comments) {
-                for (const tsContext of getTimestampContexts(comment.text)) {
-                    timeComments.push(newTimeComment(comment.authorAvatar, comment.authorName, tsContext))
-                }
-            }
-            return timeComments
-        })
+async function fetchTimeComments(videoId) {
+    const comments = await fetchComments(videoId)
+    const timeComments = []
+    for (const comment of comments) {
+        for (const tsContext of getTimestampContexts(comment.text)) {
+            timeComments.push(newTimeComment(comment.authorAvatar, comment.authorName, tsContext))
+        }
+    }
+    return timeComments
 }
 
-function fetchComments(videoId) {
-    return fetchCommentsYoutubei(videoId)
-        .catch(e => {
-            console.error(e)
-            return fetchCommentsGoogleapis(videoId)
-        })
+async function fetchComments(videoId) {
+    try {
+        return await fetchCommentsYoutubei(videoId)
+    } catch (e) {
+        console.error(e)
+        return await fetchCommentsGoogleapis(videoId)
+    }
 }
 
-function fetchCommentsYoutubei(videoId) {
-    return youtubei.fetchVideo(videoId)
-        .then(videoResponse => {
-            const commentsContinuation = videoResponse[3].response.contents.twoColumnWatchNextResults.results.results
-                .contents[2].itemSectionRenderer
-                .contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
-            //TODO: fetch 100 comments (we need to fetch multiple pages).
-            return youtubei.fetchNext(commentsContinuation).then(commentsResponse => {
-                const items = commentsResponse.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
-                const comments = []
-                for (const item of items) {
-                    if (item.commentThreadRenderer) {
-                        const cr = item.commentThreadRenderer.comment.commentRenderer
-                        const authorName = cr.authorText.simpleText
-                        const authorAvatar = cr.authorThumbnail.thumbnails[0].url
-                        const text = cr.contentText.runs
-                            .map(run => run.text)
-                            .join("")
-                        comments.push(newComment(authorName, authorAvatar, text))
-                    }
-                }
-                return comments
-            })
-        })
+async function fetchCommentsYoutubei(videoId) {
+    const videoResponse = await youtubei.fetchVideo(videoId)
+    const commentsContinuation = videoResponse[3].response.contents.twoColumnWatchNextResults.results.results
+        .contents[2].itemSectionRenderer
+        .contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+    const commentsResponse = await youtubei.fetchNext(commentsContinuation)
+    const items = commentsResponse.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
+    const comments = []
+    for (const item of items) {
+        if (item.commentThreadRenderer) {
+            const cr = item.commentThreadRenderer.comment.commentRenderer
+            const authorName = cr.authorText.simpleText
+            const authorAvatar = cr.authorThumbnail.thumbnails[0].url
+            const text = cr.contentText.runs
+                .map(run => run.text)
+                .join("")
+            comments.push(newComment(authorName, authorAvatar, text))
+        }
+    }
+    return comments
 }
 
-function fetchCommentsGoogleapis(videoId) {
-    return googleapis.fetchComments(videoId)
-        .then(commentItems => {
-            const comments = []
-            for (const item of commentItems) {
-                const cs = item.snippet.topLevelComment.snippet
-                comments.push(newComment(cs.authorDisplayName, cs.authorProfileImageUrl, cs.textOriginal))
-            }
-            return comments
-        })
+async function fetchCommentsGoogleapis(videoId) {
+    const commentItems = await googleapis.fetchComments(videoId)
+    const comments = []
+    for (const item of commentItems) {
+        const cs = item.snippet.topLevelComment.snippet
+        comments.push(newComment(cs.authorDisplayName, cs.authorProfileImageUrl, cs.textOriginal))
+    }
+    return comments
 }
 
 function newComment(authorName, authorAvatar, text) {

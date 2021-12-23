@@ -15,17 +15,18 @@ const INNERTUBE_API_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
 const INNERTUBE_CLIENT_NAME = "WEB"
 const INNERTUBE_CLIENT_VERSION = "2.20211129.09.00"
 
-export function fetchVideo(videoId) {
-    return fetch(`https://www.youtube.com/watch?v=${videoId}&pbj=1`, {
+export async function fetchVideo(videoId) {
+    const response = await fetch(`https://www.youtube.com/watch?v=${videoId}&pbj=1`, {
         credentials: "omit",
         headers: {
             "X-Youtube-Client-Name": "1",
             "X-Youtube-Client-Version": INNERTUBE_CLIENT_VERSION
         }
-    }).then(response => response.json())
+    })
+    return await response.json()
 }
 
-export function fetchNext(continuation) {
+export async function fetchNext(continuation) {
     const body = {
         context: {
             client: {
@@ -35,12 +36,13 @@ export function fetchNext(continuation) {
         },
         continuation
     }
-    return fetch(`https://www.youtube.com/youtubei/v1/next?key=${INNERTUBE_API_KEY}`, {
+    const response = await fetch(`https://www.youtube.com/youtubei/v1/next?key=${INNERTUBE_API_KEY}`, {
         method: "POST",
         credentials: "omit",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
-    }).then(response => response.json())
+    })
+    return await response.json()
 }
