@@ -2,7 +2,8 @@ import * as youtubei from './youtubei.js'
 import * as googleapis from './googleapis.js'
 import { findTimestamps, parseTimestamp } from './timestamp.js'
 
-const MAX_YOUTUBEI_COMMENT_PAGES = 5
+const YOUTUBEI_MAX_COMMENT_PAGES = 5
+const YOUTUBEI_MAX_COMMENTS = 100
 const MAX_TEXT_LENGTH = 128
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -44,7 +45,7 @@ async function fetchCommentsYoutubei(videoId) {
         .contents[2].itemSectionRenderer
         .contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
     let pageCount = 0
-    while (prevToken !== token && pageCount < MAX_YOUTUBEI_COMMENT_PAGES) {
+    while (prevToken !== token && pageCount < YOUTUBEI_MAX_COMMENT_PAGES && comments.length < YOUTUBEI_MAX_COMMENTS) {
         const commentsResponse = await youtubei.fetchNext(token)
         prevToken = token
         const items = pageCount === 0
