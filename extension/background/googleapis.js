@@ -9,27 +9,13 @@ export async function fetchComments(videoId) {
     return data.items
 }
 
-function getAuthInfo() {
+function apiKey() {
     const apiKeyIndex = Math.floor(Math.random() * API_KEYS.length)
-    const apiKey = API_KEYS[apiKeyIndex]
-    return Promise.resolve({type: 'key', data: apiKey})
+    return API_KEYS[apiKeyIndex]
 }
 
 async function fetchData(url) {
-    return getAuthInfo()
-        .then(info => {
-            if (info.type == 'key') {
-                return fetch(url + `&key=${info.data}`)
-            } else if (info.type == 'token') {
-                return fetch(url, {
-                    headers: {
-                        'Authorization': 'Bearer ' + info.data
-                    }
-                })
-            } else {
-                throw new Error("Unknown auth type: " + info.type)
-            }
-        })
+    return fetch(url + `&key=${apiKey()}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
