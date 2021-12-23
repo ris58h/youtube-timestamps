@@ -2,6 +2,7 @@ import * as youtubei from './youtubei.js'
 import * as googleapis from './googleapis.js'
 import { findTimestamps, parseTimestamp } from './timestamp.js'
 
+const MAX_YOUTUBEI_COMMENT_PAGES = 5
 const MAX_TEXT_LENGTH = 128
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -37,22 +38,32 @@ async function fetchComments(videoId) {
 
 async function fetchCommentsYoutubei(videoId) {
     const videoResponse = await youtubei.fetchVideo(videoId)
-    const commentsContinuation = videoResponse[3].response.contents.twoColumnWatchNextResults.results.results
+    const comments = []
+    let prevToken
+    let token = videoResponse[3].response.contents.twoColumnWatchNextResults.results.results
         .contents[2].itemSectionRenderer
         .contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
-    const commentsResponse = await youtubei.fetchNext(commentsContinuation)
-    const items = commentsResponse.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
-    const comments = []
-    for (const item of items) {
-        if (item.commentThreadRenderer) {
-            const cr = item.commentThreadRenderer.comment.commentRenderer
-            const authorName = cr.authorText.simpleText
-            const authorAvatar = cr.authorThumbnail.thumbnails[0].url
-            const text = cr.contentText.runs
-                .map(run => run.text)
-                .join("")
-            comments.push(newComment(authorName, authorAvatar, text))
+    let pageCount = 0
+    while (prevToken !== token && pageCount < MAX_YOUTUBEI_COMMENT_PAGES) {
+        const commentsResponse = await youtubei.fetchNext(token)
+        prevToken = token
+        const items = pageCount === 0
+            ? commentsResponse.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
+            : commentsResponse.onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems
+        for (const item of items) {
+            if (item.commentThreadRenderer) {
+                const cr = item.commentThreadRenderer.comment.commentRenderer
+                const authorName = cr.authorText.simpleText
+                const authorAvatar = cr.authorThumbnail.thumbnails[0].url
+                const text = cr.contentText.runs
+                    .map(run => run.text)
+                    .join("")
+                comments.push(newComment(authorName, authorAvatar, text))
+            } else if (item.continuationItemRenderer) {
+                token = item.continuationItemRenderer.continuationEndpoint.continuationCommand.token
+            }
         }
+        pageCount++
     }
     return comments
 }
