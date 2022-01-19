@@ -39,11 +39,12 @@ async function fetchComments(videoId) {
 
 async function fetchCommentsYoutubei(videoId) {
     const videoResponse = await youtubei.fetchVideo(videoId)
+    let token = commentsContinuationToken(videoResponse)
+    if (!token) {
+        return []
+    }
     const comments = []
     let prevToken
-    let token = videoResponse[3].response.contents.twoColumnWatchNextResults.results.results
-        .contents[2].itemSectionRenderer
-        .contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
     let pageCount = 0
     while (prevToken !== token && pageCount < YOUTUBEI_MAX_COMMENT_PAGES && comments.length < YOUTUBEI_MAX_COMMENTS) {
         const commentsResponse = await youtubei.fetchNext(token)
@@ -67,6 +68,14 @@ async function fetchCommentsYoutubei(videoId) {
         pageCount++
     }
     return comments
+}
+
+function commentsContinuationToken(videoResponse) {
+    return videoResponse.find(e => e.response).response
+        .contents.twoColumnWatchNextResults.results.results
+        .contents.find(e => e.itemSectionRenderer && e.itemSectionRenderer.sectionIdentifier == 'comment-item-section').itemSectionRenderer
+        .contents[0].continuationItemRenderer// When comments are disabled there is messageRenderer instead.
+        ?.continuationEndpoint.continuationCommand.token
 }
 
 async function fetchCommentsGoogleapis(videoId) {
