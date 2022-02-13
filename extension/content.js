@@ -1,6 +1,7 @@
 const PREVIEW_BORDER_SIZE = 2
+const PREVIEW_MARGIN = 8
 
-const navListener = function () {
+const navListener = () => {
     removeBar()
     main()
 }
@@ -57,10 +58,10 @@ function showTimeComments(timeComments) {
         const offset = tc.time / videoDuration * 100
         stamp.style.left = `calc(${offset}% - 2px)`
         bar.appendChild(stamp)
-        stamp.addEventListener('mouseenter', function () {
+        stamp.addEventListener('mouseenter', () => {
             showPreview(tc)
         })
-        stamp.addEventListener('mouseleave', function () {
+        stamp.addEventListener('mouseleave', () => {
             hidePreview()
         })
     }
@@ -90,19 +91,70 @@ function removeBar() {
     }
 }
 
+function getTooltip() {
+    return document.querySelector('.ytp-tooltip')
+}
+
 function showPreview(timeComment) {
-    const parent = document.querySelector('.ytp-tooltip')
-    if (!parent) {
+    const tooltip = getTooltip()
+    if (!tooltip) {
         return
     }
-    let preview = parent.querySelector('.__youtube-timestamps__preview')
+    let preview = getOrCreatePreview()
+    if (!preview) {
+        return
+    }
+    preview.style.display = ''
+    preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
+    preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
+    const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
+    textNode.innerHTML = ''
+    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
+
+    const tooltipBgWidth = tooltip.querySelector('.ytp-tooltip-bg').style.width
+    const previewWidth = tooltipBgWidth.endsWith('px') ? parseFloat(tooltipBgWidth) : 160
+    preview.style.width = (previewWidth + 2*PREVIEW_BORDER_SIZE) + 'px'
+
+    const halfPreviewWidth = previewWidth / 2
+    const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
+    const pivot = preview.parentElement.getBoundingClientRect().left
+    const minPivot = playerRect.left + halfPreviewWidth
+    const maxPivot = playerRect.right - halfPreviewWidth
+    let previewLeft
+    if (pivot < minPivot) {
+        previewLeft = playerRect.left - pivot
+    } else if (pivot > maxPivot) {
+        previewLeft = -previewWidth + (playerRect.right - pivot)
+    } else {
+        previewLeft = -halfPreviewWidth
+    }
+    preview.style.left = (previewLeft - PREVIEW_BORDER_SIZE) + 'px'
+
+    const tooltipTop = tooltip.style.top
+    if (tooltipTop.endsWith('px')) {
+        const previewHeith = parseFloat(tooltipTop) - 2*PREVIEW_MARGIN
+        if (previewHeith > 0) {
+            preview.style.maxHeight = previewHeith + 'px'
+        }
+    }
+
+    const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
+    highlightedTextFragment.scrollIntoView({block: 'nearest'})
+}
+
+function getOrCreatePreview() {
+    const tooltip = getTooltip()
+    if (!tooltip) {
+        return
+    }
+    let preview = tooltip.querySelector('.__youtube-timestamps__preview')
     if (!preview) {
         preview = document.createElement('div')
         preview.classList.add('__youtube-timestamps__preview')
         const previewWrapper = document.createElement('div')
         previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')
         previewWrapper.appendChild(preview)
-        parent.insertAdjacentElement('afterbegin', previewWrapper)
+        tooltip.insertAdjacentElement('afterbegin', previewWrapper)
 
         const authorElement = document.createElement('div')
         authorElement.classList.add('__youtube-timestamps__preview__author')
@@ -120,32 +172,7 @@ function showPreview(timeComment) {
         textElement.classList.add('__youtube-timestamps__preview__text')
         preview.appendChild(textElement)
     }
-    preview.style.display = ''
-    preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
-    preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
-    const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
-    textNode.innerHTML = ''
-    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
-
-    const bgWidth = parent.querySelector('.ytp-tooltip-bg').style.width
-    const previewWidth = bgWidth.endsWith('px') ? parseFloat(bgWidth) : 160
-    const halfPreviewWidth = previewWidth / 2
-    // const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
-    const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
-    const pivot = preview.parentElement.getBoundingClientRect().left
-    const minPivot = playerRect.left + halfPreviewWidth
-    const maxPivot = playerRect.right - halfPreviewWidth
-    let previewLeft
-    if (pivot < minPivot) {
-        previewLeft = playerRect.left - pivot
-    } else if (pivot > maxPivot) {
-        previewLeft = -previewWidth + (playerRect.right - pivot)
-    } else {
-        previewLeft = -halfPreviewWidth
-    }
-
-    preview.style.width = (previewWidth + 2*PREVIEW_BORDER_SIZE) + 'px'
-    preview.style.left = (previewLeft - PREVIEW_BORDER_SIZE) + 'px'
+    return preview
 }
 
 function highlightTextFragment(text, fragment) {
