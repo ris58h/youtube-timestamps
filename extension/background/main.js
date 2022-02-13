@@ -52,6 +52,9 @@ async function fetchCommentsYoutubei(videoId) {
         const items = pageCount === 0
             ? commentsResponse.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
             : commentsResponse.onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems
+        if (!items) {
+            break
+        }
         for (const item of items) {
             if (item.commentThreadRenderer) {
                 const cr = item.commentThreadRenderer.comment.commentRenderer
