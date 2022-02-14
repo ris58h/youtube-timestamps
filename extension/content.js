@@ -64,6 +64,12 @@ function showTimeComments(timeComments) {
         stamp.addEventListener('mouseleave', () => {
             hidePreview()
         })
+        stamp.addEventListener('wheel', withWheelThrottle((deltaY) => {
+            const preview = getOrCreatePreview()
+            if (preview) {
+                preview.scrollBy(0, deltaY)
+            }
+        }))
     }
 }
 
@@ -212,4 +218,26 @@ function parseParams(href) {
         }
     }
     return params
+}
+
+function withWheelThrottle(callback) {
+    let deltaYAcc = 0
+    let afRequested = false
+    return (e) => {
+        e.preventDefault()
+
+        deltaYAcc += e.deltaY
+
+        if (afRequested) {
+            return
+        }
+        afRequested = true
+
+        window.requestAnimationFrame(() => {
+            callback(deltaYAcc)
+
+            deltaYAcc = 0
+            afRequested = false
+        })
+    }
 }
