@@ -28,8 +28,8 @@
         {
             "matches": ["https://www.youtube.com/*"],
             "all_frames": true,
-            "js": ["content.js"],
-            "css": ["content.css"]
+            "js": ["content/content.js"],
+            "css": ["content/content.css"]
         }
     ],
 
