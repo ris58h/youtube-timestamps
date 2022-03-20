@@ -4,7 +4,6 @@ import { findTimestamps, parseTimestamp } from './timestamp.js'
 
 const YOUTUBEI_MAX_COMMENT_PAGES = 5
 const YOUTUBEI_MAX_COMMENTS = 100
-const MAX_TEXT_LENGTH = 128
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type == 'fetchTimeComments') {
@@ -111,34 +110,18 @@ function newTimeComment(authorAvatar, authorName, tsContext) {
 
 function getTimestampContexts(text) {
     const result = []
-    const lines = text.split('\n')
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i]
-        if (line) {
-            const positions = findTimestamps(line)
-            for (const position of positions) {
-                const timestamp = line.substring(position.from, position.to)
-                const time = parseTimestamp(timestamp)
-                if (time === null) {
-                    continue
-                }
-                let contextText
-                if (text.length > MAX_TEXT_LENGTH) {
-                    if (timestamp === line && i + 1 < lines.length && lines[i + 1]) {
-                        contextText = line + '\n' + lines[i + 1]
-                    } else {
-                        contextText = line
-                    }
-                } else {
-                    contextText = text
-                }
-                result.push({
-                    text: contextText,
-                    time,
-                    timestamp
-                })
-            }
+    const positions = findTimestamps(text)
+    for (const position of positions) {
+        const timestamp = text.substring(position.from, position.to)
+        const time = parseTimestamp(timestamp)
+        if (time === null) {
+            continue
         }
+        result.push({
+            text,
+            time,
+            timestamp
+        })
     }
     return result
 }
