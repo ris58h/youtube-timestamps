@@ -38,7 +38,7 @@ function getVideoId() {
 }
 
 function fetchTimeComments(videoId) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         chrome.runtime.sendMessage({type: 'fetchTimeComments', videoId}, resolve)
     })
 }
