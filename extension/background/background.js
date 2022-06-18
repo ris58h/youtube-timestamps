@@ -17,11 +17,25 @@ async function fetchTimeComments(videoId) {
     const comments = await fetchComments(videoId)
     const timeComments = []
     for (const comment of comments) {
-        for (const tsContext of getTimestampContexts(comment.text)) {
+        const tsContexts = getTimestampContexts(comment.text)
+        if (isChaptersComment(tsContexts)) {
+            continue
+        }
+        for (const tsContext of tsContexts) {
             timeComments.push(newTimeComment(comment.authorAvatar, comment.authorName, tsContext))
         }
     }
     return timeComments
+}
+
+function isChaptersComment(tsContexts) {
+    if (tsContexts.length < 3) {
+        return false
+    }
+    if (tsContexts[0].time !== 0) {
+        return false
+    }
+    return true
 }
 
 async function fetchComments(videoId) {
