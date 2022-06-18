@@ -6,7 +6,15 @@ export async function fetchComments(videoId) {
     const order = 'relevance'
     const maxResults = 100
     const data = await fetchData(`https://www.googleapis.com/youtube/v3/commentThreads?videoId=${videoId}&part=${part}&fields=${fields}&order=${order}&maxResults=${maxResults}`)
-    return data.items
+
+    return data.items.map(item => {
+        const cs = item.snippet.topLevelComment.snippet
+        return {
+            authorName: cs.authorDisplayName,
+            authorAvatar: cs.authorProfileImageUrl,
+            text: cs.textOriginal
+        }
+    })
 }
 
 function apiKey() {

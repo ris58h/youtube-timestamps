@@ -38,6 +38,6 @@
     ],
 
     "background": {
-        "page": "background/main.html"
+        "page": "background/background.html"
     }
 }
