@@ -49,6 +49,9 @@ function showTimeComments(timeComments) {
         return
     }
     const videoDuration = document.querySelector('video').duration
+    if (!videoDuration) {
+        return
+    }
     for (const tc of timeComments) {
         if (tc.time > videoDuration) {
             continue
