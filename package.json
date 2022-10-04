@@ -5,6 +5,7 @@
         "dist": "node dist.js"
     },
     "devDependencies": {
+        "@types/chrome": "^0.0.197",
         "archiver": "^3.0.0",
         "eslint": "^8.5.0",
         "fs-extra": "^6.0.1"
