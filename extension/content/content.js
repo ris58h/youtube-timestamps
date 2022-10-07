@@ -1,17 +1,12 @@
 const PREVIEW_BORDER_SIZE = 2
 const PREVIEW_MARGIN = 8
 
-const navListener = () => {
+main()
+
+onLocationHrefChange(() => {
     removeBar()
     main()
-}
-window.addEventListener('popstate', navListener)
-window.addEventListener('yt-navigate-start', navListener)
-// old design
-//TODO 'spfdone' fires with 'popstate' (double navListener call on history back)
-window.addEventListener('spfdone', navListener)
-
-main()
+})
 
 function main() {
     const videoId = getVideoId()
@@ -243,4 +238,15 @@ function withWheelThrottle(callback) {
             afRequested = false
         })
     }
+}
+
+function onLocationHrefChange(callback) {
+    let currentHref = document.location.href
+    const observer = new MutationObserver(() => {
+        if (currentHref != document.location.href) {
+            currentHref = document.location.href
+            callback()
+        }
+    })
+    observer.observe(document.querySelector("body"), {childList: true, subtree: true})
 }
