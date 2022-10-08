@@ -6,7 +6,7 @@
     "version": "0.6.0",
 
     "applications": {
-            "gecko": {
+        "gecko": {
             "id": "youtube-timestamps@ris58h"
         }
     },
