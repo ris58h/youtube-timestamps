@@ -32,6 +32,10 @@ function getVideoId() {
     }
 }
 
+function getVideo() {
+    return document.querySelector('video:not([data-no-fullscreen])')
+}
+
 function fetchTimeComments(videoId) {
     return new Promise((resolve) => {
         chrome.runtime.sendMessage({type: 'fetchTimeComments', videoId}, resolve)
@@ -43,7 +47,7 @@ function showTimeComments(timeComments) {
     if (!bar) {
         return
     }
-    const videoDuration = document.querySelector('video').duration
+    const videoDuration = getVideo().duration
     if (!videoDuration) {
         return
     }
