@@ -1,5 +1,4 @@
 .vscode
 node_modules
 dist
-extension/background/googleapis-keys.js
 .DS_Store

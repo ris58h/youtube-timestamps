@@ -12,7 +12,6 @@
     },
 
     "permissions": [
-        "https://www.googleapis.com/youtube/v3/*",
         "https://www.youtube.com/*",
         "webRequest",
         "webRequestBlocking"
