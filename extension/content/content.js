@@ -33,7 +33,7 @@ function getVideoId() {
 }
 
 function getVideo() {
-    return document.querySelector('video:not([data-no-fullscreen])')
+    return document.querySelector('#movie_player video')
 }
 
 function fetchTimeComments(videoId) {
@@ -78,9 +78,9 @@ function showTimeComments(timeComments) {
 function getOrCreateBar() {
     let bar = document.querySelector('.__youtube-timestamps__bar')
     if (!bar) {
-        let container = document.querySelector('.ytp-timed-markers-container')
+        let container = document.querySelector('#movie_player .ytp-timed-markers-container')
         if (!container) {
-            container = document.querySelector('.ytp-progress-list')
+            container = document.querySelector('#movie_player .ytp-progress-list')
         }
         if (!container) {
             return null
@@ -100,7 +100,7 @@ function removeBar() {
 }
 
 function getTooltip() {
-    return document.querySelector('.ytp-tooltip')
+    return document.querySelector('#movie_player .ytp-tooltip')
 }
 
 function showPreview(timeComment) {
@@ -124,7 +124,7 @@ function showPreview(timeComment) {
     preview.style.width = (previewWidth + 2*PREVIEW_BORDER_SIZE) + 'px'
 
     const halfPreviewWidth = previewWidth / 2
-    const playerRect = document.querySelector('.ytp-progress-bar').getBoundingClientRect()
+    const playerRect = document.querySelector('#movie_player .ytp-progress-bar').getBoundingClientRect()
     const pivot = preview.parentElement.getBoundingClientRect().left
     const minPivot = playerRect.left + halfPreviewWidth
     const maxPivot = playerRect.right - halfPreviewWidth
