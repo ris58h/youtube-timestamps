@@ -138,17 +138,20 @@ function showPreview(timeComment) {
     }
     preview.style.left = (previewLeft - PREVIEW_BORDER_SIZE) + 'px'
 
-    const tooltipTop = tooltip.style.top
-    if (tooltipTop.endsWith('px')) {
-        const previewHeith = parseFloat(tooltipTop) - 2*PREVIEW_MARGIN
-        if (previewHeith > 0) {
-            preview.style.maxHeight = previewHeith + 'px'
-        }
-    }
-
     const textAboveVideoPreview = tooltip.querySelector('.ytp-tooltip-edu')
     if (textAboveVideoPreview) {
         preview.style.bottom = (10 + textAboveVideoPreview.clientHeight) + 'px'
+    }
+
+    const tooltipTop = tooltip.style.top
+    if (tooltipTop.endsWith('px')) {
+        let previewHeight = parseFloat(tooltipTop) - 2*PREVIEW_MARGIN
+        if (textAboveVideoPreview) {
+            previewHeight -= textAboveVideoPreview.clientHeight
+        }
+        if (previewHeight > 0) {
+            preview.style.maxHeight = previewHeight + 'px'
+        }
     }
 
     const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
