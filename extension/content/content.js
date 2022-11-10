@@ -146,6 +146,11 @@ function showPreview(timeComment) {
         }
     }
 
+    const textAboveVideoPreview = tooltip.querySelector('.ytp-tooltip-edu')
+    if (textAboveVideoPreview) {
+        preview.style.bottom = (10 + textAboveVideoPreview.clientHeight) + 'px'
+    }
+
     const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
     highlightedTextFragment.scrollIntoView({block: 'nearest'})
 }
