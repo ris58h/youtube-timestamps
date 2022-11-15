@@ -25,7 +25,7 @@
 
     "content_scripts": [
         {
-            "matches": ["https://www.youtube.com/*"],
+            "matches": ["https://www.youtube.com/*", "https://www.youtube-nocookie.com/embed/*"],
             "all_frames": true,
             "js": ["content/content.js"],
             "css": ["content/content.css"]
