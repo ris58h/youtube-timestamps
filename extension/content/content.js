@@ -18,7 +18,7 @@ function main() {
             if (videoId !== getVideoId()) {
                 return
             }
-            showTimeComments(timeComments)
+            addTimeComments(timeComments)
         })
 }
 
@@ -42,7 +42,7 @@ function fetchTimeComments(videoId) {
     })
 }
 
-function showTimeComments(timeComments) {
+function addTimeComments(timeComments) {
     const bar = getOrCreateBar()
     if (!bar) {
         return
