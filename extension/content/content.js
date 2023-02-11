@@ -1,6 +1,8 @@
 const PREVIEW_BORDER_SIZE = 2
 const PREVIEW_MARGIN = 8
 
+const PREVIEW_TIME = 4
+
 main()
 
 onLocationHrefChange(() => {
@@ -43,11 +45,13 @@ function fetchTimeComments(videoId) {
 }
 
 function addTimeComments(timeComments) {
+    const video = getVideo()
+
     const bar = getOrCreateBar()
     if (!bar) {
         return
     }
-    const videoDuration = getVideo().duration
+    const videoDuration = video.duration
     if (!videoDuration) {
         return
     }
@@ -61,18 +65,29 @@ function addTimeComments(timeComments) {
         stamp.style.left = `calc(${offset}% - 2px)`
         bar.appendChild(stamp)
         stamp.addEventListener('mouseenter', () => {
-            showPreview(tc)
+            showTooltipPreview(tc)
         })
         stamp.addEventListener('mouseleave', () => {
-            hidePreview()
+            hideTooltipPreview()
         })
         stamp.addEventListener('wheel', withWheelThrottle((deltaY) => {
-            const preview = getOrCreatePreview()
+            const preview = getTooltipPreview()
             if (preview) {
                 preview.scrollBy(0, deltaY)
             }
         }))
     }
+
+    video.addEventListener('timeupdate', () => {
+        const currentTime = video.currentTime
+        const currentTimeComment = timeComments
+            .find(tc => tc.time > currentTime - PREVIEW_TIME/2 && tc.time < currentTime + PREVIEW_TIME/2)
+        if (currentTimeComment) {
+            showLivePreview(currentTimeComment)
+        } else {
+            hideLivePreview()
+        }
+    })
 }
 
 function getOrCreateBar() {
@@ -103,16 +118,18 @@ function getTooltip() {
     return document.querySelector('#movie_player .ytp-tooltip')
 }
 
-function showPreview(timeComment) {
+function showTooltipPreview(timeComment) {
     const tooltip = getTooltip()
     if (!tooltip) {
         return
     }
-    let preview = getOrCreatePreview()
+
+    let preview = getOrCreateTooltipPreview()
     if (!preview) {
         return
     }
-    preview.style.display = ''
+
+    //TODO extract function
     preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
     preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
     const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
@@ -154,18 +171,26 @@ function showPreview(timeComment) {
         }
     }
 
+    preview.style.display = ''
+
     const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
     highlightedTextFragment.scrollIntoView({block: 'nearest'})
 }
 
-function getOrCreatePreview() {
+function getTooltipPreview() {
+    return document.querySelector('#__youtube-timestamps__tooltip-preview')
+}
+
+function getOrCreateTooltipPreview() {
     const tooltip = getTooltip()
     if (!tooltip) {
         return
     }
-    let preview = tooltip.querySelector('.__youtube-timestamps__preview')
+    //TODO extract function
+    let preview = getTooltipPreview()
     if (!preview) {
         preview = document.createElement('div')
+        preview.id = '__youtube-timestamps__tooltip-preview'
         preview.classList.add('__youtube-timestamps__preview')
         const previewWrapper = document.createElement('div')
         previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')
@@ -191,6 +216,83 @@ function getOrCreatePreview() {
     return preview
 }
 
+function hideTooltipPreview() {
+    let preview = getTooltipPreview()
+    if (preview) {
+        preview.style.display = 'none'
+    }
+}
+
+function showLivePreview(timeComment) {
+    //TODO early return if no container?
+
+    let preview = getOrCreateLivePreview()
+    if (!preview) {
+        return
+    }
+
+    //TODO extract function
+    preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
+    preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
+    const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
+    textNode.innerHTML = ''
+    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
+
+    //TODO adjust preview position
+
+    preview.style.display = ''
+
+    const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
+    highlightedTextFragment.scrollIntoView({block: 'nearest'})
+}
+
+function getLivePreview() {
+    return document.querySelector('#__youtube-timestamps__live-preview')
+}
+
+function getOrCreateLivePreview() {
+    const container = document.querySelector('#movie_player .ytp-chrome-bottom')//TODO just #movie_player
+    if (!container) {
+        return
+    }
+
+    //TODO extract function
+    let preview = getLivePreview()
+    if (!preview) {
+        preview = document.createElement('div')
+        preview.id = '__youtube-timestamps__live-preview'
+        preview.classList.add('__youtube-timestamps__preview')
+        const previewWrapper = document.createElement('div')
+        previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')
+        previewWrapper.appendChild(preview)
+        container.insertAdjacentElement('afterbegin', previewWrapper)
+
+        const authorElement = document.createElement('div')
+        authorElement.classList.add('__youtube-timestamps__preview__author')
+        preview.appendChild(authorElement)
+
+        const avatarElement = document.createElement('img')
+        avatarElement.classList.add('__youtube-timestamps__preview__avatar')
+        authorElement.appendChild(avatarElement)
+
+        const nameElement = document.createElement('span')
+        nameElement.classList.add('__youtube-timestamps__preview__name')
+        authorElement.appendChild(nameElement)
+
+        const textElement = document.createElement('div')
+        textElement.classList.add('__youtube-timestamps__preview__text')
+        preview.appendChild(textElement)
+    }
+    return preview
+}
+
+function hideLivePreview() {
+    let preview = document.querySelector('#__youtube-timestamps__live-preview')
+    if (preview) {
+        preview.style.display = 'none'
+    }
+}
+
 function highlightTextFragment(text, fragment) {
     const result = document.createDocumentFragment()
     const parts = text.split(fragment)
@@ -207,13 +309,6 @@ function highlightTextFragment(text, fragment) {
         }
     }
     return result
-}
-
-function hidePreview() {
-    let preview = document.querySelector('.__youtube-timestamps__preview')
-    if (preview) {
-        preview.style.display = 'none'
-    }
 }
 
 function parseParams(href) {
