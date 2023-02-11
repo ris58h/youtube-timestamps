@@ -64,9 +64,11 @@ function addTimeComments(timeComments) {
         const offset = tc.time / videoDuration * 100
         stamp.style.left = `calc(${offset}% - 2px)`
         bar.appendChild(stamp)
-        //TODO on every move over stamp?
         stamp.addEventListener('mouseenter', () => {
             showTooltipPreview(tc)
+        })
+        stamp.addEventListener('mousemove', () => {
+            getTooltipPreview().style.left = getTooltip().style.left
         })
         stamp.addEventListener('mouseleave', () => {
             hideTooltipPreview()
