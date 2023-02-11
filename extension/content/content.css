@@ -21,16 +21,19 @@
     background-color: white;
 }
 
-.__youtube-timestamps__preview-wrapper {
-    position: relative;
-    left: 50%;
+#__youtube-timestamps__tooltip-preview {
+    position: absolute;
+    z-index: 40;
+}
+
+#__youtube-timestamps__live-preview {
+    position: absolute;
+    z-index: 40;
 }
 
 .__youtube-timestamps__preview {
-    position: absolute;
     overflow: auto;
     background-color: white;
-    bottom: 10px;
     box-sizing: border-box;
     padding: 8px;
 }

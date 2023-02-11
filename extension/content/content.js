@@ -64,6 +64,7 @@ function addTimeComments(timeComments) {
         const offset = tc.time / videoDuration * 100
         stamp.style.left = `calc(${offset}% - 2px)`
         bar.appendChild(stamp)
+        //TODO on every move over stamp?
         stamp.addEventListener('mouseenter', () => {
             showTooltipPreview(tc)
         })
@@ -114,6 +115,10 @@ function removeBar() {
     }
 }
 
+function getPlayer() {
+    return document.querySelector('#movie_player')
+}
+
 function getTooltip() {
     return document.querySelector('#movie_player .ytp-tooltip')
 }
@@ -131,40 +136,27 @@ function showTooltipPreview(timeComment) {
 
 function adjustTooltipPreviewSizeAndPosition(preview) {
     const tooltip = getTooltip()
+
     const tooltipBgWidth = tooltip.querySelector('.ytp-tooltip-bg').style.width
     const previewWidth = tooltipBgWidth.endsWith('px') ? parseFloat(tooltipBgWidth) : 160
     preview.style.width = (previewWidth + 2*PREVIEW_BORDER_SIZE) + 'px'
 
-    const halfPreviewWidth = previewWidth / 2
-    const playerRect = document.querySelector('#movie_player .ytp-progress-bar').getBoundingClientRect()
-    const pivot = preview.parentElement.getBoundingClientRect().left
-    const minPivot = playerRect.left + halfPreviewWidth
-    const maxPivot = playerRect.right - halfPreviewWidth
-    let previewLeft
-    if (pivot < minPivot) {
-        previewLeft = playerRect.left - pivot
-    } else if (pivot > maxPivot) {
-        previewLeft = -previewWidth + (playerRect.right - pivot)
-    } else {
-        previewLeft = -halfPreviewWidth
-    }
-    preview.style.left = (previewLeft - PREVIEW_BORDER_SIZE) + 'px'
+    preview.style.left = tooltip.style.left
 
     const textAboveVideoPreview = tooltip.querySelector('.ytp-tooltip-edu')
-    if (textAboveVideoPreview) {
-        preview.style.bottom = (10 + textAboveVideoPreview.clientHeight) + 'px'
-    }
 
-    const tooltipTop = tooltip.style.top
-    if (tooltipTop.endsWith('px')) {
-        let previewHeight = parseFloat(tooltipTop) - 2*PREVIEW_MARGIN
-        if (textAboveVideoPreview) {
-            previewHeight -= textAboveVideoPreview.clientHeight
-        }
-        if (previewHeight > 0) {
-            preview.style.maxHeight = previewHeight + 'px'
-        }
+    const playerHeight = getPlayer().getBoundingClientRect().height
+    let bottomGap = 10
+    if (bottomGap) {
+        bottomGap += textAboveVideoPreview.clientHeight
     }
+    preview.style.bottom = `calc(${playerHeight}px - ${tooltip.style.top} + ${bottomGap}px)`
+
+    let previewMaxHeight = parseFloat(tooltip.style.top) - 2*PREVIEW_MARGIN
+    if (textAboveVideoPreview) {
+        previewMaxHeight -= textAboveVideoPreview.clientHeight
+    }
+    preview.style.maxHeight = previewMaxHeight + 'px'
 }
 
 function getTooltipPreview() {
@@ -175,10 +167,7 @@ function getOrCreateTooltipPreview() {
     let preview = getTooltipPreview()
     if (!preview) {
         preview = createPreview('__youtube-timestamps__tooltip-preview')
-        const previewWrapper = document.createElement('div')
-        previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')//TODO rename class
-        previewWrapper.appendChild(preview)
-        getTooltip().insertAdjacentElement('afterbegin', previewWrapper)
+        getPlayer().appendChild(preview)
     }
     return preview
 }
@@ -209,8 +198,7 @@ function getOrCreateLivePreview() {
     let preview = getLivePreview()
     if (!preview) {
         preview = createPreview('__youtube-timestamps__live-preview')
-        const container = document.querySelector('#movie_player .ytp-chrome-bottom')//TODO just #movie_player
-        container.insertAdjacentElement('afterbegin', preview)
+        getPlayer().appendChild(preview)
     }
     return preview
 }
