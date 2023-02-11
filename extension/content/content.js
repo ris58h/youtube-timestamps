@@ -119,23 +119,18 @@ function getTooltip() {
 }
 
 function showTooltipPreview(timeComment) {
-    const tooltip = getTooltip()
-    if (!tooltip) {
-        return
-    }
-
     let preview = getOrCreateTooltipPreview()
     if (!preview) {
         return
     }
+    fillPreview(preview, timeComment)
+    adjustTooltipPreviewSizeAndPosition(preview)
+    showPreview(preview)
+    scrollPreviewToCurrentTimestamp(preview)
+}
 
-    //TODO extract function
-    preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
-    preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
-    const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
-    textNode.innerHTML = ''
-    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
-
+function adjustTooltipPreviewSizeAndPosition(preview) {
+    const tooltip = getTooltip()
     const tooltipBgWidth = tooltip.querySelector('.ytp-tooltip-bg').style.width
     const previewWidth = tooltipBgWidth.endsWith('px') ? parseFloat(tooltipBgWidth) : 160
     preview.style.width = (previewWidth + 2*PREVIEW_BORDER_SIZE) + 'px'
@@ -170,11 +165,6 @@ function showTooltipPreview(timeComment) {
             preview.style.maxHeight = previewHeight + 'px'
         }
     }
-
-    preview.style.display = ''
-
-    const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
-    highlightedTextFragment.scrollIntoView({block: 'nearest'})
 }
 
 function getTooltipPreview() {
@@ -182,36 +172,13 @@ function getTooltipPreview() {
 }
 
 function getOrCreateTooltipPreview() {
-    const tooltip = getTooltip()
-    if (!tooltip) {
-        return
-    }
-    //TODO extract function
     let preview = getTooltipPreview()
     if (!preview) {
-        preview = document.createElement('div')
-        preview.id = '__youtube-timestamps__tooltip-preview'
-        preview.classList.add('__youtube-timestamps__preview')
+        preview = createPreview('__youtube-timestamps__tooltip-preview')
         const previewWrapper = document.createElement('div')
-        previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')
+        previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')//TODO rename class
         previewWrapper.appendChild(preview)
-        tooltip.insertAdjacentElement('afterbegin', previewWrapper)
-
-        const authorElement = document.createElement('div')
-        authorElement.classList.add('__youtube-timestamps__preview__author')
-        preview.appendChild(authorElement)
-
-        const avatarElement = document.createElement('img')
-        avatarElement.classList.add('__youtube-timestamps__preview__avatar')
-        authorElement.appendChild(avatarElement)
-
-        const nameElement = document.createElement('span')
-        nameElement.classList.add('__youtube-timestamps__preview__name')
-        authorElement.appendChild(nameElement)
-
-        const textElement = document.createElement('div')
-        textElement.classList.add('__youtube-timestamps__preview__text')
-        preview.appendChild(textElement)
+        getTooltip().insertAdjacentElement('afterbegin', previewWrapper)
     }
     return preview
 }
@@ -219,31 +186,19 @@ function getOrCreateTooltipPreview() {
 function hideTooltipPreview() {
     let preview = getTooltipPreview()
     if (preview) {
-        preview.style.display = 'none'
+        hidePreview(preview)
     }
 }
 
 function showLivePreview(timeComment) {
-    //TODO early return if no container?
-
     let preview = getOrCreateLivePreview()
     if (!preview) {
         return
     }
-
-    //TODO extract function
-    preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
-    preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
-    const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
-    textNode.innerHTML = ''
-    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
-
-    //TODO adjust preview position
-
-    preview.style.display = ''
-
-    const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
-    highlightedTextFragment.scrollIntoView({block: 'nearest'})
+    fillPreview(preview, timeComment)
+    //TODO adjust preview size and position
+    showPreview(preview)
+    scrollPreviewToCurrentTimestamp(preview)
 }
 
 function getLivePreview() {
@@ -251,37 +206,11 @@ function getLivePreview() {
 }
 
 function getOrCreateLivePreview() {
-    const container = document.querySelector('#movie_player .ytp-chrome-bottom')//TODO just #movie_player
-    if (!container) {
-        return
-    }
-
-    //TODO extract function
     let preview = getLivePreview()
     if (!preview) {
-        preview = document.createElement('div')
-        preview.id = '__youtube-timestamps__live-preview'
-        preview.classList.add('__youtube-timestamps__preview')
-        const previewWrapper = document.createElement('div')
-        previewWrapper.classList.add('__youtube-timestamps__preview-wrapper')
-        previewWrapper.appendChild(preview)
-        container.insertAdjacentElement('afterbegin', previewWrapper)
-
-        const authorElement = document.createElement('div')
-        authorElement.classList.add('__youtube-timestamps__preview__author')
-        preview.appendChild(authorElement)
-
-        const avatarElement = document.createElement('img')
-        avatarElement.classList.add('__youtube-timestamps__preview__avatar')
-        authorElement.appendChild(avatarElement)
-
-        const nameElement = document.createElement('span')
-        nameElement.classList.add('__youtube-timestamps__preview__name')
-        authorElement.appendChild(nameElement)
-
-        const textElement = document.createElement('div')
-        textElement.classList.add('__youtube-timestamps__preview__text')
-        preview.appendChild(textElement)
+        preview = createPreview('__youtube-timestamps__live-preview')
+        const container = document.querySelector('#movie_player .ytp-chrome-bottom')//TODO just #movie_player
+        container.insertAdjacentElement('afterbegin', preview)
     }
     return preview
 }
@@ -289,8 +218,53 @@ function getOrCreateLivePreview() {
 function hideLivePreview() {
     let preview = document.querySelector('#__youtube-timestamps__live-preview')
     if (preview) {
-        preview.style.display = 'none'
+        hidePreview(preview)
     }
+}
+
+function createPreview(id) {
+    const preview = document.createElement('div')
+    preview.id = id
+    preview.classList.add('__youtube-timestamps__preview')
+
+    const authorElement = document.createElement('div')
+    authorElement.classList.add('__youtube-timestamps__preview__author')
+    preview.appendChild(authorElement)
+
+    const avatarElement = document.createElement('img')
+    avatarElement.classList.add('__youtube-timestamps__preview__avatar')
+    authorElement.appendChild(avatarElement)
+
+    const nameElement = document.createElement('span')
+    nameElement.classList.add('__youtube-timestamps__preview__name')
+    authorElement.appendChild(nameElement)
+
+    const textElement = document.createElement('div')
+    textElement.classList.add('__youtube-timestamps__preview__text')
+    preview.appendChild(textElement)
+
+    return preview
+}
+
+function fillPreview(preview, timeComment) {
+    preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
+    preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
+    const textNode = preview.querySelector('.__youtube-timestamps__preview__text')
+    textNode.innerHTML = ''
+    textNode.appendChild(highlightTextFragment(timeComment.text, timeComment.timestamp))
+}
+
+function showPreview(preview) {
+    preview.style.display = ''
+}
+
+function hidePreview(preview) {
+    preview.style.display = 'none'
+}
+
+function scrollPreviewToCurrentTimestamp(preview) {
+    const highlightedTextFragment = preview.querySelector('.__youtube-timestamps__preview__text-stamp')
+    highlightedTextFragment.scrollIntoView({block: 'nearest'})
 }
 
 function highlightTextFragment(text, fragment) {
