@@ -1,5 +1,5 @@
 # YouTube Timestamps
-Web extension that shows timestamps from comments on timeline.
+Web extension that shows timestamps from YouTube comments on timeline.
 
 https://ris58h.github.io/youtube-timestamps/
 
