@@ -1,8 +1,9 @@
 import fs from 'fs'
 import archiver from 'archiver'
 
-fs.rmSync("./dist", {recursive: true, force: true})
-fs.mkdirSync("./dist")
+if (!fs.existsSync("./dist")) {
+    fs.mkdirSync("./dist")
+}
 
 const name = process.env.npm_package_name
 const version = readJsonSync("./extension/manifest.json").version
