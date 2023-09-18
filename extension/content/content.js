@@ -44,13 +44,7 @@ function fetchTimeComments(videoId) {
 
 function addTimeComments(timeComments) {
     const bar = getOrCreateBar()
-    if (!bar) {
-        return
-    }
     const videoDuration = getVideo().duration
-    if (!videoDuration) {
-        return
-    }
     for (const tc of timeComments) {
         if (tc.time > videoDuration) {
             continue
@@ -82,9 +76,6 @@ function getOrCreateBar() {
         if (!container) {
             container = document.querySelector('#movie_player .ytp-progress-list')
         }
-        if (!container) {
-            return null
-        }
         bar = document.createElement('div')
         bar.classList.add('__youtube-timestamps__bar')
         container.appendChild(bar)
@@ -105,13 +96,7 @@ function getTooltip() {
 
 function showPreview(timeComment) {
     const tooltip = getTooltip()
-    if (!tooltip) {
-        return
-    }
-    let preview = getOrCreatePreview()
-    if (!preview) {
-        return
-    }
+    const preview = getOrCreatePreview()
     preview.style.display = ''
     preview.querySelector('.__youtube-timestamps__preview__avatar').src = timeComment.authorAvatar
     preview.querySelector('.__youtube-timestamps__preview__name').textContent = timeComment.authorName
@@ -160,9 +145,6 @@ function showPreview(timeComment) {
 
 function getOrCreatePreview() {
     const tooltip = getTooltip()
-    if (!tooltip) {
-        return
-    }
     let preview = tooltip.querySelector('.__youtube-timestamps__preview')
     if (!preview) {
         preview = document.createElement('div')
@@ -210,7 +192,7 @@ function highlightTextFragment(text, fragment) {
 }
 
 function hidePreview() {
-    let preview = document.querySelector('.__youtube-timestamps__preview')
+    const preview = document.querySelector('.__youtube-timestamps__preview')
     if (preview) {
         preview.style.display = 'none'
     }
