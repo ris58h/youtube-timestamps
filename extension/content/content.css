@@ -71,6 +71,11 @@
     color: #065fd4;
 }
 
+#__youtube-timestamps__context-menu {
+    position: absolute;
+    width: 200px;
+}
+
 @media (prefers-color-scheme: dark) {
     .__youtube-timestamps__preview {
         background-color: #181818;

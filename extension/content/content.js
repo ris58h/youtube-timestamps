@@ -5,8 +5,18 @@ main()
 
 onLocationHrefChange(() => {
     removeBar()
+    removeContextMenu()
     main()
 })
+
+document.addEventListener('click', e => {
+    const stamp = e.target.closest('.__youtube-timestamps__stamp')
+    if (stamp) {
+        // TODO
+    } else {
+        hideContextMenu()
+    }
+}, true)
 
 function main() {
     const videoId = getVideoId()
@@ -66,6 +76,11 @@ function addTimeComments(timeComments) {
                 preview.scrollBy(0, deltaY)
             }
         }))
+        stamp.addEventListener('contextmenu', e => {
+            e.preventDefault()
+            e.stopPropagation()
+            showContextMenu(tc, e.pageX, e.pageY)
+        })
     }
 }
 
@@ -243,4 +258,74 @@ function onLocationHrefChange(callback) {
         }
     })
     observer.observe(document.querySelector("body"), {childList: true, subtree: true})
+}
+
+function showContextMenu(timeComment, x, y) {
+    const contextMenu = getOrCreateContextMenu()
+    contextMenu.style.display = ''
+    adjustContextMenuSizeAndPosition(contextMenu, x, y)
+}
+
+function adjustContextMenuSizeAndPosition(contextMenu, x, y) {
+    const menuHeight = contextMenu.querySelector('.ytp-panel-menu').clientHeight
+    contextMenu.style.height = menuHeight + 'px'
+    contextMenu.style.top = (y - menuHeight) + 'px'
+    contextMenu.style.left = x + 'px'
+}
+
+function getOrCreateContextMenu() {
+    let contextMenu = document.body.querySelector('#__youtube-timestamps__context-menu')
+    if (!contextMenu) {
+        contextMenu = document.createElement('div')
+        contextMenu.id = '__youtube-timestamps__context-menu'
+        contextMenu.classList.add('ytp-popup')
+        document.body.appendChild(contextMenu)
+
+        const panelElement = document.createElement('div')
+        panelElement.classList.add('ytp-panel')
+        contextMenu.appendChild(panelElement)
+
+        const menuElement = document.createElement('div')
+        menuElement.classList.add('ytp-panel-menu')
+        panelElement.appendChild(menuElement)
+
+        menuElement.appendChild(menuItemElement("Reply"))
+        menuElement.appendChild(menuItemElement("Like"))
+        menuElement.appendChild(menuItemElement("Dislike"))
+        menuElement.appendChild(menuItemElement("Report"))
+    }
+    return contextMenu
+}
+
+function menuItemElement(label) {
+    const itemElement = document.createElement('div')
+    itemElement.classList.add('ytp-menuitem')
+    itemElement.addEventListener('click', e => {
+        alert(label)//TODO
+    })
+
+    const iconElement = document.createElement('div')
+    iconElement.classList.add('ytp-menuitem-icon')
+    itemElement.appendChild(iconElement)
+
+    const labelElement = document.createElement('div')
+    labelElement.classList.add('ytp-menuitem-label')
+    labelElement.textContent = label
+    itemElement.appendChild(labelElement)
+
+    return itemElement
+}
+
+function hideContextMenu() {
+    const contextMenu = document.querySelector('#__youtube-timestamps__context-menu')
+    if (contextMenu) {
+        contextMenu.style.display = 'none'
+    }
+}
+
+function removeContextMenu() {
+    const contextMenu = document.querySelector('#__youtube-timestamps__context-menu')
+    if (contextMenu) {
+        contextMenu.remove()
+    }
 }
