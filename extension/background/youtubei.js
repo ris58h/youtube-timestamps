@@ -39,12 +39,14 @@ export async function fetchComments(videoId) {
         for (const item of items) {
             if (item.commentThreadRenderer) {
                 const cr = item.commentThreadRenderer.comment.commentRenderer
+                const commentId = cr.commentId
                 const authorName = cr.authorText.simpleText
                 const authorAvatar = cr.authorThumbnail.thumbnails[0].url
                 const text = cr.contentText.runs
                     .map(run => run.text)
                     .join("")
                 comments.push({
+                    commentId,
                     authorName,
                     authorAvatar,
                     text

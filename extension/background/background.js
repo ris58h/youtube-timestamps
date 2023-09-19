@@ -20,7 +20,14 @@ async function fetchTimeComments(videoId) {
             continue
         }
         for (const tsContext of tsContexts) {
-            timeComments.push(newTimeComment(comment.authorAvatar, comment.authorName, tsContext))
+            timeComments.push({
+                commentId: comment.commentId,
+                authorAvatar: comment.authorAvatar,
+                authorName: comment.authorName,
+                timestamp: tsContext.timestamp,
+                time: tsContext.time,
+                text: tsContext.text
+            })
         }
     }
     return timeComments
@@ -38,16 +45,6 @@ function isChaptersComment(tsContexts) {
 
 async function fetchComments(videoId) {
     return await youtubei.fetchComments(videoId)
-}
-
-function newTimeComment(authorAvatar, authorName, tsContext) {
-    return {
-        authorAvatar,
-        authorName,
-        timestamp: tsContext.timestamp,
-        time: tsContext.time,
-        text: tsContext.text
-    }
 }
 
 function getTimestampContexts(text) {

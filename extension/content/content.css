@@ -72,8 +72,7 @@
 }
 
 #__youtube-timestamps__context-menu {
-    position: absolute;
-    width: 200px;
+    width: 230px;
 }
 
 @media (prefers-color-scheme: dark) {

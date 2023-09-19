@@ -264,6 +264,11 @@ function showContextMenu(timeComment, x, y) {
     const contextMenu = getOrCreateContextMenu()
     contextMenu.style.display = ''
     adjustContextMenuSizeAndPosition(contextMenu, x, y)
+    fillContextMenuData(contextMenu, timeComment)
+}
+
+function fillContextMenuData(contextMenu, timeComment) {
+    contextMenu.dataset.commentId = timeComment.commentId
 }
 
 function adjustContextMenuSizeAndPosition(contextMenu, x, y) {
@@ -289,20 +294,19 @@ function getOrCreateContextMenu() {
         menuElement.classList.add('ytp-panel-menu')
         panelElement.appendChild(menuElement)
 
-        menuElement.appendChild(menuItemElement("Reply"))
-        menuElement.appendChild(menuItemElement("Like"))
-        menuElement.appendChild(menuItemElement("Dislike"))
-        menuElement.appendChild(menuItemElement("Report"))
+        menuElement.appendChild(menuItemElement("Open in New Tab", () => {
+            const videoId = getVideoId()
+            const commentId = contextMenu.dataset.commentId
+            window.open(`https://www.youtube.com/watch?v=${videoId}&lc=${commentId}`, '_blank')
+        }))
     }
     return contextMenu
 }
 
-function menuItemElement(label) {
+function menuItemElement(label, callback) {
     const itemElement = document.createElement('div')
     itemElement.classList.add('ytp-menuitem')
-    itemElement.addEventListener('click', e => {
-        alert(label)//TODO
-    })
+    itemElement.addEventListener('click', callback)
 
     const iconElement = document.createElement('div')
     iconElement.classList.add('ytp-menuitem-icon')
