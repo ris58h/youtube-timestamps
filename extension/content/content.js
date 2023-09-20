@@ -11,9 +11,13 @@ onLocationHrefChange(() => {
 
 document.addEventListener('click', e => {
     const stamp = e.target.closest('.__youtube-timestamps__stamp')
-    if (stamp) {
-        // TODO
-    } else {
+    if (!stamp) {
+        hideContextMenu()
+    }
+}, true)
+document.addEventListener('contextmenu', e => {
+    const stamp = e.target.closest('.__youtube-timestamps__stamp')
+    if (!stamp) {
         hideContextMenu()
     }
 }, true)
@@ -55,6 +59,7 @@ function fetchTimeComments(videoId) {
 function addTimeComments(timeComments) {
     const bar = getOrCreateBar()
     const videoDuration = getVideo().duration
+    let contextMenuTimeComment = null
     for (const tc of timeComments) {
         if (tc.time > videoDuration) {
             continue
@@ -79,7 +84,12 @@ function addTimeComments(timeComments) {
         stamp.addEventListener('contextmenu', e => {
             e.preventDefault()
             e.stopPropagation()
-            showContextMenu(tc, e.pageX, e.pageY)
+            if (tc === contextMenuTimeComment && isContextMenuVisible()) {
+                hideContextMenu()
+            } else {
+                showContextMenu(tc, e.pageX, e.pageY)
+                contextMenuTimeComment = tc
+            }
         })
     }
 }
@@ -279,7 +289,7 @@ function adjustContextMenuSizeAndPosition(contextMenu, x, y) {
 }
 
 function getOrCreateContextMenu() {
-    let contextMenu = document.body.querySelector('#__youtube-timestamps__context-menu')
+    let contextMenu = getContextMenu()
     if (!contextMenu) {
         contextMenu = document.createElement('div')
         contextMenu.id = '__youtube-timestamps__context-menu'
@@ -320,15 +330,24 @@ function menuItemElement(label, callback) {
     return itemElement
 }
 
+function getContextMenu() {
+    return document.querySelector('#__youtube-timestamps__context-menu')
+}
+
+function isContextMenuVisible() {
+    const contextMenu = getContextMenu()
+    return contextMenu && !contextMenu.style.display
+}
+
 function hideContextMenu() {
-    const contextMenu = document.querySelector('#__youtube-timestamps__context-menu')
+    const contextMenu = getContextMenu()
     if (contextMenu) {
         contextMenu.style.display = 'none'
     }
 }
 
 function removeContextMenu() {
-    const contextMenu = document.querySelector('#__youtube-timestamps__context-menu')
+    const contextMenu = getContextMenu()
     if (contextMenu) {
         contextMenu.remove()
     }
