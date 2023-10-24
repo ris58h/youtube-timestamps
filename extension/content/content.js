@@ -37,7 +37,7 @@ function main() {
 }
 
 function getVideoId() {
-    if (window.location.pathname == '/watch') {
+    if (window.location.pathname === '/watch') {
         return parseParams(window.location.href)['v']
     } else if (window.location.pathname.startsWith('/embed/')) {
         return window.location.pathname.substring('/embed/'.length)
@@ -262,7 +262,7 @@ function withWheelThrottle(callback) {
 function onLocationHrefChange(callback) {
     let currentHref = document.location.href
     const observer = new MutationObserver(() => {
-        if (currentHref != document.location.href) {
+        if (currentHref !== document.location.href) {
             currentHref = document.location.href
             callback()
         }

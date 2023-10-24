@@ -1,7 +1,7 @@
 import * as youtubei from './youtubei.js'
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type == 'fetchTimeComments') {
+    if (request.type === 'fetchTimeComments') {
         fetchTimeComments(request.videoId)
             .then(sendResponse)
             .catch(e => {
