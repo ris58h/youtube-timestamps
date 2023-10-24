@@ -34,13 +34,7 @@ async function fetchTimeComments(videoId) {
 }
 
 function isChaptersComment(tsContexts) {
-    if (tsContexts.length < 3) {
-        return false
-    }
-    if (tsContexts[0].time !== 0) {
-        return false
-    }
-    return true
+    return tsContexts.length >= 3 && tsContexts[0].time === 0
 }
 
 async function fetchComments(videoId) {
