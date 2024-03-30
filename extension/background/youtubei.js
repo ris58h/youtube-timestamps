@@ -61,7 +61,10 @@ export async function fetchComments(videoId) {
 }
 
 function commentsContinuationToken(videoResponse) {
-    return videoResponse.find(e => e.response).response
+    const response = Array.isArray(videoResponse)
+        ? videoResponse.find(e => e.response).response
+        : videoResponse.response
+    return response
         .contents.twoColumnWatchNextResults.results.results
         .contents.find(e => e.itemSectionRenderer && e.itemSectionRenderer.sectionIdentifier === 'comment-item-section').itemSectionRenderer
         .contents[0].continuationItemRenderer// When comments are disabled there is messageRenderer instead.
