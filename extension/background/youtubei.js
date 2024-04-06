@@ -36,21 +36,42 @@ export async function fetchComments(videoId) {
         if (!items) {
             break
         }
+
         for (const item of items) {
             if (item.commentThreadRenderer) {
-                const cr = item.commentThreadRenderer.comment.commentRenderer
-                const commentId = cr.commentId
-                const authorName = cr.authorText.simpleText
-                const authorAvatar = cr.authorThumbnail.thumbnails[0].url
-                const text = cr.contentText.runs
-                    .map(run => run.text)
-                    .join("")
-                comments.push({
-                    commentId,
-                    authorName,
-                    authorAvatar,
-                    text
-                })
+                const commentThreadRenderer = item.commentThreadRenderer
+                if (commentThreadRenderer.comment) {
+                    const cr = commentThreadRenderer.comment.commentRenderer
+                    const commentId = cr.commentId
+                    const authorName = cr.authorText.simpleText
+                    const authorAvatar = cr.authorThumbnail.thumbnails[0].url
+                    const text = cr.contentText.runs
+                        .map(run => run.text)
+                        .join("")
+                    comments.push({
+                        commentId,
+                        authorName,
+                        authorAvatar,
+                        text
+                    })
+                } else if (commentThreadRenderer.commentViewModel) {
+                    const commentViewModel = commentThreadRenderer.commentViewModel.commentViewModel
+                    const commentKey = commentViewModel.commentKey
+                    //TODO collect in a map once instead of searching every time
+                    const mutation = commentsResponse.frameworkUpdates.entityBatchUpdate.mutations
+                        .find(e => e.entityKey === commentKey)
+                    const commentEntityPayload = mutation.payload.commentEntityPayload
+                    const commentId = commentEntityPayload.properties.commentId
+                    const authorName = commentEntityPayload.author.displayName
+                    const authorAvatar = commentEntityPayload.author.avatarThumbnailUrl
+                    const text = commentEntityPayload.properties.content.content
+                    comments.push({
+                        commentId,
+                        authorName,
+                        authorAvatar,
+                        text
+                    })
+                }
             } else if (item.continuationItemRenderer) {
                 token = item.continuationItemRenderer.continuationEndpoint.continuationCommand.token
             }
