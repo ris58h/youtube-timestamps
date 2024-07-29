@@ -3,7 +3,7 @@
 
     "name": "YouTube Timestamps",
     "description": "Shows YouTube timestamps from comments.",
-    "version": "0.9.1",
+    "version": "1.0",
 
     "permissions": ["declarativeNetRequestWithHostAccess"],
     "host_permissions": ["https://www.youtube.com/"],
