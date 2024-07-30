@@ -3,3 +3,6 @@
 node_modules
 dist
 .DS_Store
+
+# Filenames starting with "_" are reserved for use by the system.
+extension/_*
