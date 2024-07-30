@@ -5,6 +5,12 @@
     "description": "Shows YouTube timestamps from comments.",
     "version": "1.0",
 
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "youtube-timestamps@ris58h"
+        }
+    },
+
     "permissions": ["declarativeNetRequestWithHostAccess"],
     "host_permissions": ["https://www.youtube.com/"],
     "declarative_net_request": {
